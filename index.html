@@ -3,1304 +3,677 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>保研录取潜力测评</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Noto+Serif+SC:wght@300;400;600&display=swap" rel="stylesheet">
+<title>保研录取潜力测评 · Academic Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink: #1a1614;
-    --parchment: #f4efe5;
-    --gold: #b8960c;
-    --gold-light: #e6d090;
-    --crimson: #7a1c2e;
-    --deep: #1e2840;
-    --mist: #8a8070;
-    --cream: #faf7ef;
-    --shadow: rgba(26,22,20,0.15);
-    --accent: #2c4a6e;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Noto Serif SC', 'Cormorant Garamond', serif;
-    background: var(--parchment);
-    color: var(--ink);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      radial-gradient(ellipse at 15% 50%, rgba(44,74,110,0.07) 0%, transparent 55%),
-      radial-gradient(ellipse at 85% 20%, rgba(184,150,12,0.06) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .page-border {
-    position: fixed; inset: 16px;
-    border: 1px solid rgba(184,150,12,0.3); pointer-events: none; z-index: 100;
-  }
-  .page-border::before {
-    content: ''; position: absolute; inset: 4px;
-    border: 1px solid rgba(184,150,12,0.15);
-  }
-  .corner { position: fixed; width: 56px; height: 56px; z-index: 101; opacity: 0.55; }
-  .corner svg { width: 100%; height: 100%; }
-  .corner-tl { top: 10px; left: 10px; }
-  .corner-tr { top: 10px; right: 10px; transform: scaleX(-1); }
-  .corner-bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
-  .corner-br { bottom: 10px; right: 10px; transform: scale(-1); }
-
-  .screen {
-    position: relative; z-index: 1; min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 60px 24px;
-    opacity: 0; transform: translateY(20px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  .screen.active { opacity: 1; transform: translateY(0); }
-  .screen.hidden { display: none; }
-
-  /* INTRO */
-  .intro-emblem {
-    width: 110px; height: 110px; margin-bottom: 30px;
-    animation: emblem-rotate 40s linear infinite; opacity: 0.75;
-  }
-  @keyframes emblem-rotate { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-
-  .eyebrow {
-    font-family: 'Cinzel', serif; font-size: 10px;
-    letter-spacing: 0.45em; color: var(--gold); text-transform: uppercase; margin-bottom: 18px;
-  }
-  h1 {
-    font-family: 'Cinzel', serif; font-size: clamp(26px, 4.5vw, 48px);
-    font-weight: 400; color: var(--deep); text-align: center;
-    line-height: 1.2; margin-bottom: 10px; letter-spacing: 0.05em;
-  }
-  .subtitle {
-    font-family: 'Cormorant Garamond', serif; font-size: clamp(14px, 2.5vw, 20px);
-    font-style: italic; color: var(--mist); text-align: center;
-    margin-bottom: 44px; letter-spacing: 0.03em;
-  }
-  .divider {
-    display: flex; align-items: center; gap: 16px;
-    margin-bottom: 36px; width: 100%; max-width: 420px;
-  }
-  .divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-  .divider-gem { width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); }
-
-  .intro-text {
-    max-width: 580px; text-align: center; line-height: 1.95;
-    color: #4a3e32; font-size: 15px; margin-bottom: 44px;
-  }
-  .dim-tags {
-    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
-    max-width: 560px; margin-bottom: 44px;
-  }
-  .dim-tag {
-    font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.2em;
-    padding: 7px 14px; border: 1px solid rgba(184,150,12,0.35);
-    color: var(--accent); background: rgba(44,74,110,0.05);
-  }
-  .btn-primary {
-    font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 0.25em;
-    text-transform: uppercase; color: var(--cream); background: var(--deep);
-    border: none; padding: 18px 52px; cursor: pointer;
-    transition: all 0.3s ease;
-    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
-  }
-  .btn-primary:hover { background: var(--crimson); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(122,28,46,0.3); }
-
-  /* QUIZ */
-  #quiz-screen { padding: 48px 20px 60px; justify-content: flex-start; }
-  .progress-container { width: 100%; max-width: 720px; margin-bottom: 26px; }
-  .progress-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-  .progress-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.3em; color: var(--gold); }
-  .progress-count { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--mist); letter-spacing: 0.05em; }
-  .progress-count span { color: var(--deep); font-weight: 600; }
-  .dim-indicator {
-    font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.25em;
-    color: var(--accent); text-transform: uppercase; margin-bottom: 6px;
-  }
-  .progress-bar-track { height: 2px; background: rgba(184,150,12,0.2); position: relative; }
-  .progress-bar-fill {
-    height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold));
-    transition: width 0.6s cubic-bezier(0.4,0,0.2,1); position: relative;
-  }
-  .progress-bar-fill::after {
-    content: ''; position: absolute; right: -4px; top: 50%; transform: translateY(-50%);
-    width: 8px; height: 8px; background: var(--gold); border-radius: 50%; box-shadow: 0 0 8px var(--gold);
-  }
-
-  .question-wrapper { width: 100%; max-width: 720px; position: relative; overflow: hidden; }
-  .question-card {
-    background: var(--cream); border: 1px solid rgba(184,150,12,0.22);
-    padding: 36px 32px 32px; position: relative;
-    box-shadow: 0 8px 44px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.9);
-    border-radius: 3px;
-  }
-  .question-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0;
-    height: 3px; background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  }
-  .question-number {
-    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.4em;
-    color: var(--accent); margin-bottom: 18px; display: flex; align-items: center; gap: 12px;
-  }
-  .question-number .q-dim-tag {
-    font-size: 8px; padding: 3px 10px; background: rgba(44,74,110,0.08);
-    border: 1px solid rgba(44,74,110,0.2); letter-spacing: 0.15em;
-  }
-  .question-number::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(184,150,12,0.35), transparent); }
-  .question-text {
-    font-family: 'Noto Serif SC', serif; font-size: clamp(17px, 2.4vw, 22px);
-    font-weight: 400; line-height: 1.85; color: var(--deep); margin-bottom: 32px; letter-spacing: 0.03em;
-  }
-
-  .likert-container { width: 100%; }
-  .likert-strip {
-    display: flex; width: 100%; margin: 6px 0 4px;
-    border: 1px solid rgba(184,150,12,0.22); overflow: hidden;
-  }
-  .likert-cell {
-    flex: 1; cursor: pointer; position: relative;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 14px 4px 12px; background: transparent; border: none;
-    border-right: 1px solid rgba(184,150,12,0.16);
-    transition: background 0.2s ease; outline: none; gap: 7px;
-  }
-  .likert-cell:last-child { border-right: none; }
-  .likert-dot {
-    width: 17px; height: 17px; border-radius: 50%;
-    border: 1.5px solid rgba(184,150,12,0.4);
-    background: transparent; transition: all 0.2s ease; flex-shrink: 0;
-  }
-  .likert-cell-label {
-    font-family: 'Noto Serif SC', serif; font-size: 10px; color: #a09080;
-    text-align: center; line-height: 1.3; letter-spacing: 0.01em; transition: color 0.2s;
-  }
-  .likert-cell:hover { background: rgba(44,74,110,0.05); }
-  .likert-cell:hover .likert-dot { border-color: var(--accent); background: rgba(44,74,110,0.15); }
-  .likert-cell:hover .likert-cell-label { color: var(--deep); }
-
-  .likert-cell.sel-1 { background: rgba(122,28,46,0.08); }
-  .likert-cell.sel-1 .likert-dot { background: #7a1c2e; border-color: #7a1c2e; box-shadow: 0 0 6px rgba(122,28,46,0.3); }
-  .likert-cell.sel-1 .likert-cell-label { color: #7a1c2e; font-weight: 600; }
-
-  .likert-cell.sel-2 { background: rgba(160,100,40,0.08); }
-  .likert-cell.sel-2 .likert-dot { background: #a06428; border-color: #a06428; }
-  .likert-cell.sel-2 .likert-cell-label { color: #804e20; font-weight: 600; }
-
-  .likert-cell.sel-3 { background: rgba(138,128,112,0.08); }
-  .likert-cell.sel-3 .likert-dot { background: #8a8070; border-color: #8a8070; }
-  .likert-cell.sel-3 .likert-cell-label { color: #706860; font-weight: 600; }
-
-  .likert-cell.sel-4 { background: rgba(44,74,110,0.08); }
-  .likert-cell.sel-4 .likert-dot { background: #2c5a7e; border-color: #2c5a7e; }
-  .likert-cell.sel-4 .likert-cell-label { color: #1e4060; font-weight: 600; }
-
-  .likert-cell.sel-5 { background: rgba(20,60,40,0.08); }
-  .likert-cell.sel-5 .likert-dot { background: #1a4a2e; border-color: #1a4a2e; box-shadow: 0 0 6px rgba(20,60,40,0.3); }
-  .likert-cell.sel-5 .likert-cell-label { color: #1a4a2e; font-weight: 600; }
-
-  .likert-endpoints {
-    display: flex; justify-content: space-between; margin-top: 5px; padding: 0 2px;
-  }
-  .likert-ep { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.12em; color: var(--mist); }
-
-  .nav-buttons { display: flex; gap: 16px; margin-top: 20px; justify-content: space-between; width: 100%; max-width: 720px; }
-  .btn-nav {
-    font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.2em;
-    text-transform: uppercase; padding: 13px 28px; border: 1px solid rgba(184,150,12,0.3);
-    background: transparent; color: var(--mist); cursor: pointer; transition: all 0.25s;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .btn-nav:hover:not(:disabled) { border-color: var(--gold); color: var(--deep); }
-  .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
-  .btn-submit {
-    font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.25em;
-    text-transform: uppercase; padding: 13px 36px; background: var(--deep);
-    color: var(--cream); border: none; cursor: pointer; transition: all 0.3s;
-    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%); display: none;
-  }
-  .btn-submit:hover { background: var(--crimson); transform: translateY(-1px); box-shadow: 0 4px 18px rgba(122,28,46,0.3); }
-  .btn-submit.visible { display: flex; align-items: center; gap: 10px; }
-
-  /* SLIDE ANIMATIONS */
-  .slide-out-left { animation: slideOutLeft 0.28s ease forwards; }
-  .slide-in-right { animation: slideInRight 0.28s ease forwards; }
-  .slide-out-right { animation: slideOutRight 0.28s ease forwards; }
-  .slide-in-left { animation: slideInLeft 0.28s ease forwards; }
-  @keyframes slideOutLeft { to { transform: translateX(-55px); opacity: 0; } }
-  @keyframes slideInRight { from { transform: translateX(55px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  @keyframes slideOutRight { to { transform: translateX(55px); opacity: 0; } }
-  @keyframes slideInLeft { from { transform: translateX(-55px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-  /* MODAL */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(20,18,16,0.72);
-    z-index: 300; display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal-box {
-    background: var(--cream); border: 1px solid rgba(184,150,12,0.4);
-    padding: 44px; max-width: 540px; width: 90%; position: relative;
-    box-shadow: 0 20px 55px rgba(20,18,16,0.3);
-  }
-  .modal-box::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0;
-    height: 3px; background: linear-gradient(90deg, transparent, var(--crimson), transparent);
-  }
-  .modal-title { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 0.3em; color: var(--crimson); margin-bottom: 8px; }
-  .modal-subtitle { font-size: 14px; color: var(--mist); margin-bottom: 22px; line-height: 1.6; }
-  .unanswered-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
-  .unanswered-btn {
-    font-family: 'Cinzel', serif; font-size: 11px; padding: 7px 14px;
-    border: 1px solid rgba(184,150,12,0.35); background: transparent;
-    color: var(--crimson); cursor: pointer; transition: all 0.2s; letter-spacing: 0.1em;
-  }
-  .unanswered-btn:hover { background: var(--crimson); color: var(--cream); }
-  .modal-close {
-    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.3em;
-    padding: 11px 26px; border: 1px solid rgba(184,150,12,0.3); background: transparent;
-    color: var(--mist); cursor: pointer; transition: all 0.2s;
-  }
-  .modal-close:hover { border-color: var(--gold); color: var(--deep); }
-
-  /* LOADING */
-  .loading-screen {
-    position: fixed; inset: 0; background: var(--parchment); z-index: 200;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: opacity 0.8s ease;
-  }
-  .loading-screen.fade-out { opacity: 0; pointer-events: none; }
-  .hourglass { width: 44px; height: 44px; animation: hourglass-flip 2.2s ease-in-out infinite; margin-bottom: 22px; opacity: 0.5; }
-  @keyframes hourglass-flip { 0%,40%{transform:rotate(0)}50%,90%{transform:rotate(180deg)}100%{transform:rotate(180deg)} }
-  .loading-text { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.4em; color: var(--mist); animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:0.4}50%{opacity:1} }
-
-  /* RESULT */
-  #result-screen { padding: 72px 24px; max-width: 980px; margin: 0 auto; }
-  .result-header { text-align: center; margin-bottom: 52px; }
-  .result-tier-badge {
-    font-family: 'Cinzel', serif; font-size: clamp(11px, 1.8vw, 14px);
-    letter-spacing: 0.5em; color: var(--gold); text-transform: uppercase; margin-bottom: 14px;
-  }
-  .result-school-level {
-    font-family: 'Cinzel', serif; font-size: clamp(30px, 6vw, 64px);
-    font-weight: 600; color: var(--deep); letter-spacing: 0.08em; line-height: 1.1;
-    margin-bottom: 12px; position: relative; display: inline-block;
-  }
-  .result-school-level::after {
-    content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-    width: 60%; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-  .result-summary { font-family: 'Cormorant Garamond', serif; font-size: clamp(18px, 3.5vw, 28px); font-style: italic; color: var(--crimson); margin-top: 22px; margin-bottom: 6px; }
-  .result-tagline { font-family: 'Cinzel', serif; font-size: 9px; color: var(--mist); letter-spacing: 0.18em; text-transform: uppercase; }
-
-  /* SCHOOL SHOWCASE */
-  .school-showcase {
-    display: flex; align-items: flex-start; justify-content: center;
-    gap: 48px; margin-bottom: 48px; flex-wrap: wrap;
-  }
-  .school-emblem-wrap {
-    flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 10px;
-  }
-  .school-emblem-wrap svg { filter: drop-shadow(0 8px 24px rgba(30,40,64,0.18)); }
-  .school-emblem-label {
-    font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.28em; color: var(--mist); text-align: center;
-  }
-  .school-info { max-width: 320px; text-align: left; }
-  .score-badge {
-    display: inline-flex; align-items: center; gap: 10px;
-    border: 1px solid rgba(184,150,12,0.35); padding: 10px 18px;
-    margin-bottom: 16px; background: rgba(184,150,12,0.04);
-  }
-  .score-num { font-family: 'Cinzel', serif; font-size: 28px; color: var(--accent); font-weight: 600; }
-  .score-text { font-size: 12px; color: var(--mist); line-height: 1.5; }
-  .target-schools { margin-top: 12px; }
-  .target-schools-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.3em; color: var(--gold); margin-bottom: 8px; }
-  .school-chips { display: flex; flex-wrap: wrap; gap: 7px; }
-  .school-chip {
-    font-size: 12px; color: var(--deep); padding: 5px 11px;
-    border: 1px solid rgba(184,150,12,0.28); background: rgba(184,150,12,0.05);
-    font-family: 'Noto Serif SC', serif; letter-spacing: 0.02em;
-  }
-
-  /* DIMENSION RADAR */
-  .dimension-bars {
-    background: var(--cream); border: 1px solid rgba(184,150,12,0.2);
-    padding: 40px; margin-bottom: 36px; box-shadow: 0 2px 20px var(--shadow);
-  }
-  .dimension-title { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.4em; color: var(--gold); margin-bottom: 28px; text-align: center; }
-  .dim-row-result { display: grid; grid-template-columns: 90px 1fr 44px; align-items: center; gap: 16px; margin-bottom: 22px; }
-  .dim-row-label {
-    font-family: 'Noto Serif SC', serif; font-size: 13px; color: var(--deep); font-weight: 400;
-    display: flex; flex-direction: column; gap: 2px;
-  }
-  .dim-row-label small { font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.2em; color: var(--mist); }
-  .dim-bar-track { height: 8px; background: rgba(184,150,12,0.12); position: relative; border-radius: 1px; }
-  .dim-bar-fill {
-    height: 100%; position: absolute; left: 0; top: 0; border-radius: 1px;
-    transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
-  }
-  .dim-score-pct {
-    font-family: 'Cinzel', serif; font-size: 11px; color: var(--accent); text-align: right; font-weight: 600;
-  }
-
-  /* RESULT SECTIONS */
-  .result-sections { display: grid; gap: 22px; }
-  .result-section {
-    background: var(--cream); border: 1px solid rgba(184,150,12,0.18);
-    padding: 34px 38px; box-shadow: 0 2px 18px var(--shadow); position: relative;
-  }
-  .result-section::before {
-    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-    width: 3px; background: linear-gradient(180deg, var(--accent), var(--gold));
-  }
-  .section-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.4em; color: var(--gold); margin-bottom: 10px; }
-  .section-title { font-family: 'Cormorant Garamond', serif; font-size: 21px; color: var(--deep); margin-bottom: 14px; font-weight: 600; }
-  .section-body { font-size: 15px; line-height: 1.9; color: #4a3e32; }
-  .action-items { list-style: none; margin-top: 12px; display: grid; gap: 8px; }
-  .action-items li {
-    display: flex; align-items: flex-start; gap: 10px;
-    font-size: 14px; color: #4a3e32; line-height: 1.7;
-  }
-  .action-items li::before {
-    content: '◆'; color: var(--gold); font-size: 8px; flex-shrink: 0; margin-top: 5px;
-  }
-  .schools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 10px; margin-top: 14px; }
-  .school-tier-card {
-    padding: 12px 14px; border: 1px solid rgba(184,150,12,0.25);
-    background: rgba(184,150,12,0.04); text-align: center;
-  }
-  .school-tier-card .tier-name { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.2em; color: var(--gold); margin-bottom: 4px; }
-  .school-tier-card .school-list { font-size: 12px; color: var(--deep); line-height: 1.6; font-family: 'Noto Serif SC', serif; }
-  .btn-restart {
-    margin-top: 44px; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.25em;
-    text-transform: uppercase; padding: 15px 46px; background: transparent; color: var(--deep);
-    border: 1px solid rgba(184,150,12,0.4); cursor: pointer; transition: all 0.3s;
-  }
-  .btn-restart:hover { background: var(--deep); color: var(--cream); border-color: var(--deep); }
-
-  @media (max-width: 768px) {
-    .question-card { padding: 26px 18px; }
-    .question-text { font-size: 18px; }
-    .result-section { padding: 22px 18px; }
-    .dimension-bars { padding: 22px 18px; }
-    .dim-row-result { grid-template-columns: 70px 1fr 38px; }
-  }
-  @media (max-width: 600px) {
-    .likert-cell { padding: 12px 2px 10px; gap: 5px; }
-    .likert-dot { width: 15px; height: 15px; }
-    .likert-cell-label { font-size: 9px; }
-  }
+:root{
+  --ink:#0a1628;--ink2:#1c2e4a;--blue:#0f3d8a;--blue2:#1a56c4;--blue3:#3b82f6;
+  --accent:#d4a017;--accent2:#fbbf24;
+  --paper:#f6f4ef;--paper2:#ede9e0;--paper3:#e0dbd0;
+  --muted:#6b7a99;--border:#c8c0b0;--border2:#d8d2c8;
+  --white:#ffffff;--red:#8b1c1c;--green:#1a5c3a;
+  --shadow:0 2px 20px rgba(10,22,40,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Serif SC','Libre Baskerville',Georgia,serif;font-feature-settings:'kern' 1,'liga' 1;-webkit-font-smoothing:antialiased;letter-spacing:.01em;}
+#loading{position:fixed;inset:0;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .6s}
+#loading.out{opacity:0;pointer-events:none}
+.load-ring{width:60px;height:60px;border:1.5px solid rgba(255,255,255,.08);border-top-color:rgba(212,160,23,.6);border-radius:50%;animation:spin 1.2s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;color:rgba(255,255,255,.35);text-transform:uppercase}
+.screen{display:none}.screen.active{display:flex}
+#intro{flex-direction:column;min-height:100vh}
+.intro-nav{background:var(--ink);padding:0 56px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.28em;color:rgba(255,255,255,.35);text-transform:uppercase}
+.nav-ver{font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(212,160,23,.5);letter-spacing:.15em}
+.intro-hero{background:var(--ink);padding:72px 56px 80px;position:relative;overflow:hidden}
+.intro-hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.025) 39px,rgba(255,255,255,.025) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.025) 39px,rgba(255,255,255,.025) 40px)}
+.intro-hero::after{content:'';position:absolute;right:-120px;top:-120px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(15,61,138,.5) 0%,transparent 70%)}
+.intro-hero-inner{max-width:900px;margin:0 auto;position:relative;z-index:1}
+.hero-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.25em;color:var(--accent);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.hero-eyebrow::before{content:'';display:inline-block;width:24px;height:1px;background:var(--accent)}
+.hero-h1{font-family:'EB Garamond',Georgia,serif;font-size:clamp(32px,4.5vw,56px);font-weight:500;color:#fff;line-height:1.08;margin-bottom:6px;letter-spacing:-.02em;font-feature-settings:'swsh' 1;}
+.hero-h1 em{font-style:italic;color:#93b4e8}
+.hero-sub{font-family:'EB Garamond',Georgia,serif;font-size:18px;font-style:italic;color:rgba(255,255,255,.45);margin-bottom:40px}
+.btn-begin{display:inline-flex;align-items:center;gap:14px;background:var(--blue2);color:#fff;font-family:'Noto Serif SC',serif;font-size:18px;letter-spacing:.12em;font-weight:700;border:none;padding:18px 48px;cursor:pointer;transition:all .3s;box-shadow:0 4px 24px rgba(15,61,138,.35);}
+.btn-begin:hover{background:var(--blue3);transform:translateX(6px);box-shadow:0 6px 32px rgba(59,130,246,.45);}
+.intro-dims{background:var(--paper);padding:56px}
+.intro-dims-inner{max-width:900px;margin:0 auto}
+.section-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.28em;color:var(--muted);text-transform:uppercase;margin-bottom:28px;padding-bottom:12px;border-bottom:1px solid var(--border2)}
+.dims-table{width:100%;border-collapse:collapse}
+.dims-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;padding:8px 16px;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
+.dims-table td{padding:14px 16px;border-bottom:1px solid var(--border2);vertical-align:middle}
+.dt-name{font-weight:500;font-size:14px;color:var(--ink)}
+.dt-en{display:block;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.12em;margin-top:2px}
+.dt-bar{height:4px;background:var(--paper3);border-radius:2px;overflow:hidden;width:120px}
+.dt-fill{height:100%;border-radius:2px;background:var(--blue2)}
+.dt-wt{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--blue);text-align:right}
+#quiz{flex-direction:column;min-height:100vh}
+.quiz-header{background:var(--ink2);height:60px;display:flex;align-items:stretch;position:sticky;top:0;z-index:50;padding:0 32px;gap:24px}
+.qh-logo{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.45);display:flex;align-items:center;white-space:nowrap;font-weight:500;}
+.qh-dims{flex:1;display:flex;gap:0}
+.qh-dim{flex:1;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC',serif;font-size:13px;letter-spacing:.04em;color:rgba(255,255,255,.35);border-bottom:2px solid transparent;transition:all .25s;padding:0 6px;text-align:center;font-weight:400;}
+.qh-dim.cur{color:#fff;border-bottom-color:var(--accent);background:rgba(212,160,23,.1);font-weight:700;font-size:14px;letter-spacing:.02em;}
+.qh-dim.done{color:rgba(255,255,255,.55);border-bottom-color:rgba(255,255,255,.2);font-weight:500;}
+.qh-count{font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:4px;white-space:nowrap;font-weight:500;}
+.qh-count strong{color:rgba(255,255,255,.85)}
+/* 进度条：flex布局与header完全一致，实现像素级对齐 */
+.progress-wrap{position:sticky;top:60px;z-index:49;height:4px;background:rgba(255,255,255,.04);display:flex;padding:0 32px;gap:24px;}
+.pw-logo-space{flex-shrink:0;}
+.pw-dims{flex:1;display:flex;}
+.pw-count-space{flex-shrink:0;}
+.progress-seg{flex:1;height:100%;transition:background .3s ease;}
+.quiz-body{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:48px 24px 64px}
+.q-outer{width:100%;max-width:640px}
+.q-panel{background:var(--white);border:1px solid var(--border2);box-shadow:var(--shadow);padding:0;animation:panelIn .32s ease}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-panel-header{padding:20px 28px 0}
+.q-dim-pill{display:inline-flex;align-items:center;gap:8px;font-family:'Noto Serif SC',serif;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--blue2);background:rgba(15,61,138,.09);padding:6px 14px;margin-bottom:16px;border-left:3px solid var(--blue2);}
+.q-idx{display:none}
+.q-text{font-family:'EB Garamond',Georgia,serif;font-size:clamp(15px,1.8vw,18px);letter-spacing:.015em;line-height:1.9;color:var(--ink);padding:0 28px;margin-bottom:0;font-weight:400}
+.q-note{margin:12px 28px 0;padding:10px 14px;background:var(--paper);border-left:2px solid var(--border);font-size:12px;color:var(--muted);line-height:1.7;font-style:italic}
+.q-opts{padding:20px 28px 28px}
+.opts-choice{display:grid;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid var(--border2);background:var(--white);cursor:pointer;transition:all .18s;width:100%;text-align:left;outline:none}
+.opt:hover{border-color:var(--blue2);background:rgba(15,61,138,.03)}
+.opt.sel{border-color:var(--blue);background:rgba(15,61,138,.06)}
+.opt-key{flex-shrink:0;width:24px;height:24px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);transition:all .18s}
+.opt.sel .opt-key{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:inset 0 0 0 3px rgba(255,255,255,0.35);}
+.opt-txt{font-size:13px;letter-spacing:.01em;line-height:1.65;padding-top:2px}
+.opt.sel .opt-txt{color:var(--ink);font-weight:500}
+.opts-binary{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bin{padding:20px 16px;border:1px solid var(--border2);background:var(--white);cursor:pointer;transition:all .18s;outline:none;text-align:center}
+.bin:hover{border-color:var(--blue2);background:rgba(15,61,138,.03)}
+.bin-icon{font-size:22px;margin-bottom:8px;display:block}
+.bin-txt{font-size:13px;color:var(--ink2);line-height:1.55}
+.bin.sel-y{border-color:var(--green);background:rgba(26,92,58,.05)}.bin.sel-y .bin-txt{color:var(--green);font-weight:500}
+.bin.sel-n{border-color:var(--red);background:rgba(139,28,28,.04)}.bin.sel-n .bin-txt{color:var(--red);font-weight:500}
+.opts-tri{display:grid;gap:8px}
+.tri{display:flex;align-items:flex-start;gap:12px;padding:14px 14px;border:1px solid var(--border2);background:var(--white);cursor:pointer;transition:all .18s;width:100%;text-align:left;outline:none}
+.tri:hover{border-color:var(--blue2);background:rgba(15,61,138,.03)}
+.tri-dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;border:2px solid var(--border);margin-top:5px;transition:all .18s}
+.tri-content{display:flex;flex-direction:column}
+.tri-lvl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.15em;color:var(--muted);margin-bottom:3px;text-transform:uppercase}
+.tri-txt{font-size:13.5px;color:var(--ink2);line-height:1.6}
+.tri.sel-h{border-color:var(--green)}.tri.sel-h .tri-dot{background:var(--green);border-color:var(--green)}.tri.sel-h .tri-lvl{color:var(--green)}.tri.sel-h .tri-txt{color:var(--ink)}
+.tri.sel-m{border-color:var(--blue2)}.tri.sel-m .tri-dot{background:var(--blue2);border-color:var(--blue2)}.tri.sel-m .tri-lvl{color:var(--blue2)}.tri.sel-m .tri-txt{color:var(--ink)}
+.tri.sel-l{border-color:#a16207}.tri.sel-l .tri-dot{background:#a16207;border-color:#a16207}.tri.sel-l .tri-lvl{color:#a16207}.tri.sel-l .tri-txt{color:var(--ink)}
+.q-nav{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.nav-b{display:flex;align-items:center;gap:8px;font-family:'Noto Serif SC',serif;font-size:13px;letter-spacing:.06em;color:var(--ink2);background:transparent;border:1.5px solid var(--border);padding:11px 24px;cursor:pointer;transition:all .2s;font-weight:600;}
+.nav-b:hover:not(:disabled){color:var(--blue);border-color:var(--blue);background:rgba(15,61,138,.03)}
+.nav-b:disabled{opacity:.3;cursor:not-allowed}
+.nav-submit{display:none;align-items:center;gap:8px;font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;letter-spacing:.06em;color:#fff;background:var(--blue);border:none;padding:14px 32px;cursor:pointer;transition:all .2s;}
+.nav-submit.show{display:flex}.nav-submit:hover{background:var(--blue3)}
+.modal-bg{position:fixed;inset:0;background:rgba(10,22,40,.7);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--white);border:1px solid var(--border);max-width:480px;width:92%;padding:36px;box-shadow:0 24px 64px rgba(10,22,40,.25)}
+.modal-ttl{font-family:'EB Garamond',serif;font-size:20px;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.modal-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.modal-qb{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:5px 12px;border:1px solid var(--border);background:var(--paper);color:var(--blue);cursor:pointer;transition:all .15s;letter-spacing:.08em}
+.modal-qb:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.modal-close{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:9px 20px;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.12em}
+.modal-close:hover{border-color:var(--ink);color:var(--ink)}
+#result{flex-direction:column;min-height:100vh}
+.res-hero{background:var(--ink);padding:0;position:relative;overflow:hidden}
+.res-hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.02) 39px,rgba(255,255,255,.02) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.02) 39px,rgba(255,255,255,.02) 40px)}
+.res-hero-inner{max-width:900px;margin:0 auto;padding:56px 56px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;position:relative;z-index:1}
+.res-tier-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.28em;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.res-tier-label::before{content:'';display:inline-block;width:20px;height:1px;background:var(--accent)}
+.res-name{font-family:'EB Garamond',serif;font-size:clamp(22px,3vw,40px);font-weight:500;color:#fff;line-height:1.1;margin-bottom:6px}
+.res-sub{font-family:'EB Garamond',serif;font-size:17px;font-style:italic;color:rgba(255,255,255,.5);margin-bottom:20px}
+.res-chips{display:flex;flex-wrap:wrap;gap:6px}
+.res-chip{font-size:11px;color:rgba(255,255,255,.65);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);padding:4px 10px}
+.score-box{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);padding:28px 36px;text-align:center;min-width:160px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:64px;font-weight:500;color:#fff;line-height:1;display:block}
+.score-lbl{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.22em;color:rgba(255,255,255,.3);margin-top:6px;display:block}
+.score-bar{height:2px;background:rgba(255,255,255,.1);margin-top:14px}
+.score-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue2),var(--blue3));transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+.res-body{max-width:900px;margin:0 auto;padding:48px 56px}
+.res-grid{display:grid;grid-template-columns:1fr;gap:24px;margin-bottom:24px}
+.panel{background:var(--white);border:1px solid var(--border2);box-shadow:var(--shadow)}
+.panel-hd{padding:14px 24px;border-bottom:1px solid var(--border2);background:var(--paper);display:flex;align-items:center;justify-content:space-between}
+.panel-lbl{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.panel-ttl{font-size:15px;font-weight:600;color:var(--ink)}
+.panel-bd{padding:22px 24px}
+.dim-row{margin-bottom:16px}
+.dim-row-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.dim-rname{font-size:13px;font-weight:500;color:var(--ink)}
+.dim-ren{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);margin-left:6px}
+.dim-rscore{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500}
+.dim-rbar{height:4px;background:var(--paper3);border-radius:2px;overflow:hidden}
+.dim-rfill{height:100%;border-radius:2px;transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+.dim-rlvl{font-size:11px;color:var(--muted);margin-top:3px;font-style:italic}
+.illus-wrap{display:flex;flex-direction:column;align-items:center;padding:24px 40px}
+.illus-lbl{font-family:'Noto Serif SC',serif;font-size:14px;font-weight:600;color:var(--ink2);text-align:center;margin-top:12px;line-height:1.8}
+.res-sections{display:grid;gap:16px}
+.sec-panel{background:var(--white);border:1px solid var(--border2);box-shadow:var(--shadow)}
+.sec-hd{padding:14px 24px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px}
+.sec-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.sec-ttl{font-size:15px;font-weight:700;color:var(--ink)}
+.sec-en{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;color:var(--muted);margin-left:auto}
+.sec-bd{padding:20px 24px;font-size:14px;line-height:1.85;color:#374151}
+.sec-bd p+p{margin-top:10px}
+.action-list{list-style:none;display:grid;gap:8px}
+.action-li{display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.7;color:#374151}
+.act-n{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;margin-top:2px}
+.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tier-cell{padding:12px 14px;border:1px solid var(--border2)}
+.tier-cell-hd{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.12em;margin-bottom:10px;text-transform:uppercase}
+.tier-cell-body{font-size:15px;font-weight:500;color:var(--ink2);line-height:1.7}
+.disclaimer{background:var(--paper);border:1px solid var(--border2);padding:16px 20px;font-size:12px;color:var(--muted);line-height:1.7;font-style:italic;margin-top:20px}
+.btn-restart{display:inline-flex;align-items:center;gap:10px;margin-top:32px;font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;letter-spacing:.08em;color:var(--ink);background:transparent;border:2px solid var(--ink);padding:16px 40px;cursor:pointer;transition:all .25s;}
+.btn-restart:hover{background:var(--ink);color:#fff}
+@media(max-width:860px){
+  .intro-hero{padding:48px 28px 56px}.intro-dims{padding:36px 28px}
+  .res-hero-inner{grid-template-columns:1fr;gap:20px;padding:44px 28px}
+  .score-box{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:18px 22px}
+  .score-big{font-size:48px}.res-grid{grid-template-columns:1fr}.res-body{padding:24px 16px}
+  .tier-grid{grid-template-columns:1fr}.quiz-header{padding:0 18px;gap:14px}
+  .qh-logo{display:none}.qh-dim{font-size:11px}
+  .progress-wrap{padding:0 18px;gap:14px}
+  .pw-logo-space{display:none!important}
+}
+@media(max-width:560px){
+  .opts-binary{grid-template-columns:1fr}.qh-dim{letter-spacing:.04em}.sec-en{display:none}
+}
 </style>
 </head>
 <body>
 
-<div class="page-border"></div>
-<div class="corner corner-tl"><svg viewBox="0 0 56 56" fill="none"><path d="M4 4 L4 28 M4 4 L28 4" stroke="#b8960c" stroke-width="1"/><path d="M4 4 L18 18" stroke="#b8960c" stroke-width="0.5"/><circle cx="4" cy="4" r="3" stroke="#b8960c" stroke-width="1"/><path d="M11 4 L11 11 L4 11" stroke="#b8960c" stroke-width="0.5" fill="none"/></svg></div>
-<div class="corner corner-tr"><svg viewBox="0 0 56 56" fill="none"><path d="M4 4 L4 28 M4 4 L28 4" stroke="#b8960c" stroke-width="1"/><path d="M4 4 L18 18" stroke="#b8960c" stroke-width="0.5"/><circle cx="4" cy="4" r="3" stroke="#b8960c" stroke-width="1"/><path d="M11 4 L11 11 L4 11" stroke="#b8960c" stroke-width="0.5" fill="none"/></svg></div>
-<div class="corner corner-bl"><svg viewBox="0 0 56 56" fill="none"><path d="M4 4 L4 28 M4 4 L28 4" stroke="#b8960c" stroke-width="1"/><path d="M4 4 L18 18" stroke="#b8960c" stroke-width="0.5"/><circle cx="4" cy="4" r="3" stroke="#b8960c" stroke-width="1"/><path d="M11 4 L11 11 L4 11" stroke="#b8960c" stroke-width="0.5" fill="none"/></svg></div>
-<div class="corner corner-br"><svg viewBox="0 0 56 56" fill="none"><path d="M4 4 L4 28 M4 4 L28 4" stroke="#b8960c" stroke-width="1"/><path d="M4 4 L18 18" stroke="#b8960c" stroke-width="0.5"/><circle cx="4" cy="4" r="3" stroke="#b8960c" stroke-width="1"/><path d="M11 4 L11 11 L4 11" stroke="#b8960c" stroke-width="0.5" fill="none"/></svg></div>
-
-<div class="loading-screen" id="loading">
-  <svg class="hourglass" viewBox="0 0 48 48" fill="none">
-    <path d="M12 6h24M12 42h24M14 6C14 16 24 20 24 24C24 28 14 32 14 42M34 6C34 16 24 20 24 24C24 28 34 32 34 42" stroke="#b8960c" stroke-width="1.5"/>
-    <circle cx="24" cy="26" r="3" fill="#b8960c" opacity="0.6"/>
-  </svg>
-  <div class="loading-text">系统初始化中 · · ·</div>
+<div id="loading">
+  <div class="load-ring"></div>
+  <div class="load-txt">Initializing Assessment System</div>
 </div>
 
-<div class="modal-overlay" id="unanswered-modal">
+<div class="modal-bg" id="modal">
   <div class="modal-box">
-    <div class="modal-title">⚠ 尚有题目未作答</div>
-    <div class="modal-subtitle" id="modal-subtitle">以下题目尚未填写，点击题号可直接跳转：</div>
-    <div class="unanswered-grid" id="unanswered-grid"></div>
-    <button class="modal-close" onclick="closeModal()">继续作答</button>
+    <div class="modal-ttl">有题目尚未作答</div>
+    <div class="modal-sub" id="modal-sub">请先完成以下题目再生成报告：</div>
+    <div class="modal-grid" id="modal-grid"></div>
+    <button class="modal-close" onclick="closeModal()">返回继续作答</button>
   </div>
 </div>
 
-<!-- INTRO -->
-<div class="screen hidden" id="intro-screen">
-  <svg class="intro-emblem" viewBox="0 0 110 110" fill="none">
-    <circle cx="55" cy="55" r="50" stroke="#b8960c" stroke-width="0.5" stroke-dasharray="3 4"/>
-    <circle cx="55" cy="55" r="38" stroke="#b8960c" stroke-width="0.5"/>
-    <circle cx="55" cy="55" r="24" stroke="#2c4a6e" stroke-width="1"/>
-    <circle cx="55" cy="55" r="8" fill="#2c4a6e" opacity="0.25"/>
-    <path d="M55 6 L55 104 M6 55 L104 55" stroke="#b8960c" stroke-width="0.3"/>
-    <path d="M55 6 L90 90 L14 38 L96 38 L20 90 Z" stroke="#2c4a6e" stroke-width="0.4" fill="none" opacity="0.4"/>
-    <path d="M55 20 L67 50 L98 50 L74 68 L82 98 L55 80 L28 98 L36 68 L12 50 L43 50 Z" stroke="#b8960c" stroke-width="0.3" fill="none" opacity="0.45"/>
-    <!-- graduation cap hint in center -->
-    <rect x="48" y="49" width="14" height="8" rx="1" fill="#2c4a6e" opacity="0.3"/>
-    <path d="M42 52 L55 47 L68 52" stroke="#2c4a6e" stroke-width="1" fill="none" opacity="0.5"/>
-  </svg>
-  <div class="eyebrow">基于推免评估理论体系</div>
-  <h1>保研录取潜力测评</h1>
-  <div class="subtitle">精准评估你的推免竞争层次</div>
-  <div class="divider"><div class="divider-line"></div><div class="divider-gem"></div><div class="divider-line"></div></div>
-  <p class="intro-text">
-    保研录取是一个综合竞争体系。参考教育部推免政策与各高校公开招生数据，
-    本测评围绕影响保研竞争力的<strong>五大核心维度</strong>构建评估模型：
-    <br><br>
-    学业基础（35%）·英语能力（20%）·科研经历（25%）·竞赛荣誉（10%）·申请软实力（10%）
-    <br><br>
-    共计 <strong>40</strong> 道结构化题目，采用五级自评量表，结合维度权重算法，
-    为你生成院校匹配层次与个性化提升建议。
-    <br><br>
-    <em>请依据真实现状如实作答，数据越准确，结果越具参考价值。</em>
-  </p>
-  <div class="dim-tags">
-    <span class="dim-tag">学业基础 · ACADEMIC</span>
-    <span class="dim-tag">英语能力 · ENGLISH</span>
-    <span class="dim-tag">科研经历 · RESEARCH</span>
-    <span class="dim-tag">竞赛荣誉 · COMPETITION</span>
-    <span class="dim-tag">申请软实力 · SOFT SKILLS</span>
+<div class="screen" id="intro">
+  <div class="intro-nav">
+    <div class="nav-logo">Postgraduate Recommendation Assessment</div>
+    <div class="nav-ver">v1.0 · 2026</div>
   </div>
-  <button class="btn-primary" onclick="startTest()">开始测评</button>
+  <div class="intro-hero">
+    <div class="intro-hero-inner">
+      <div class="hero-eyebrow">2025 · Graduate Admission</div>
+      <h1 class="hero-h1">保研录取<br><em>潜力测评</em></h1>
+      <p class="hero-sub">Postgraduate Recommendation · Probability Assessment</p>
+      <button class="btn-begin" onclick="startTest()">
+        开始测评
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="intro-dims">
+    <div class="intro-dims-inner">
+      <div class="section-eyebrow">Evaluation Dimensions · 评估维度权重分布</div>
+      <table class="dims-table">
+        <thead><tr><th>维度</th><th>权重占比</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><span class="dt-name">学业背景 <span class="dt-en">Academic Record</span></span></td><td><div class="dt-bar"><div class="dt-fill" style="width:35%"></div></div></td><td class="dt-wt">35%</td></tr>
+          <tr><td><span class="dt-name">英语能力 <span class="dt-en">English Competency</span></span></td><td><div class="dt-bar"><div class="dt-fill" style="width:15%"></div></div></td><td class="dt-wt">15%</td></tr>
+          <tr><td><span class="dt-name">科研经历 <span class="dt-en">Research Experience</span></span></td><td><div class="dt-bar"><div class="dt-fill" style="width:30%"></div></div></td><td class="dt-wt">30%</td></tr>
+          <tr><td><span class="dt-name">竞赛荣誉 <span class="dt-en">Academic Competitions</span></span></td><td><div class="dt-bar"><div class="dt-fill" style="width:10%"></div></div></td><td class="dt-wt">10%</td></tr>
+          <tr><td><span class="dt-name">申请软实力 <span class="dt-en">Application Readiness</span></span></td><td><div class="dt-bar"><div class="dt-fill" style="width:10%"></div></div></td><td class="dt-wt">10%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
-<!-- QUIZ -->
-<div class="screen hidden" id="quiz-screen">
-  <div class="progress-container">
-    <div class="progress-meta">
-      <div>
-        <div class="dim-indicator" id="dim-indicator">维度一 · 学业基础</div>
-        <div class="progress-label">测评进度</div>
+<div class="screen" id="quiz">
+  <div class="quiz-header" id="quiz-header">
+    <div class="qh-logo" id="qh-logo">保研测评</div>
+    <div class="qh-dims" id="qh-dims">
+      <div class="qh-dim" data-d="academic">学业</div>
+      <div class="qh-dim" data-d="english">英语</div>
+      <div class="qh-dim" data-d="research">科研</div>
+      <div class="qh-dim" data-d="competition">竞赛</div>
+      <div class="qh-dim" data-d="softskill">软实力</div>
+    </div>
+    <div class="qh-count" id="qh-count">Q<strong id="qcur">1</strong>/<strong>35</strong></div>
+  </div>
+  <!--
+    进度条用与header完全相同的flex结构：
+    padding:0 32px, gap:24px
+    左占位(qh-logo宽度) + flex:1的dims区(内含5个flex:1的段) + 右占位(qh-count宽度)
+    这样每个段与上方维度标签天然对齐，无需JS测量
+  -->
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="pw-logo-space" id="pw-logo-space"></div>
+    <div class="pw-dims" id="pw-dims">
+      <div class="progress-seg" id="pseg-academic"></div>
+      <div class="progress-seg" id="pseg-english"></div>
+      <div class="progress-seg" id="pseg-research"></div>
+      <div class="progress-seg" id="pseg-competition"></div>
+      <div class="progress-seg" id="pseg-softskill"></div>
+    </div>
+    <div class="pw-count-space" id="pw-count-space"></div>
+  </div>
+  <div class="quiz-body">
+    <div class="q-outer">
+      <div class="q-panel" id="qpanel"></div>
+      <div class="q-nav">
+        <button class="nav-b" id="btn-prev" onclick="nav(-1)" disabled>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 10L4 6l4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          上一题
+        </button>
+        <button class="nav-b" id="btn-next" onclick="nav(1)">
+          下一题
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="nav-submit" id="btn-sub" onclick="submit()">
+          生成报告
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
-      <div class="progress-count"><span id="current-q">1</span> / 40</div>
     </div>
-    <div class="progress-bar-track">
-      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
-    </div>
-  </div>
-  <div class="question-wrapper">
-    <div class="question-card" id="question-card">
-      <div class="question-number" id="q-number">QUESTION 01 <span class="q-dim-tag" id="q-dim-tag">学业基础</span></div>
-      <div class="question-text" id="q-text"></div>
-      <div id="likert-container"></div>
-    </div>
-  </div>
-  <div class="nav-buttons">
-    <button class="btn-nav" id="btn-prev" onclick="navigate(-1)" disabled>← 上一题</button>
-    <button class="btn-nav" id="btn-next" onclick="navigate(1)">下一题 →</button>
-    <button class="btn-submit" id="btn-submit" onclick="submitTest()">生成报告 ✦</button>
   </div>
 </div>
 
-<!-- RESULT -->
-<div class="screen hidden" id="result-screen">
-  <div class="result-header">
-    <div class="result-tier-badge" id="result-tier-badge">综合评估结果</div>
-    <div class="result-school-level" id="result-school-level"></div>
-    <div class="result-summary" id="result-summary"></div>
-    <div class="result-tagline" id="result-tagline"></div>
+<div class="screen" id="result">
+  <div class="res-hero">
+    <div class="res-hero-inner">
+      <div>
+        <div class="res-tier-label" id="rtag">Result</div>
+        <div class="res-name" id="rname"></div>
+        <div class="res-sub" id="rsub"></div>
+        <div class="res-chips" id="rchips"></div>
+      </div>
+      <div class="score-box">
+        <span class="score-big" id="rscore">—</span>
+        <span class="score-lbl">Composite Score / 100</span>
+        <div class="score-bar"><div class="score-bar-fill" id="rbar" style="width:0%"></div></div>
+      </div>
+    </div>
   </div>
-  <div class="school-showcase" id="school-showcase"></div>
-  <div class="dimension-bars" id="dimension-bars">
-    <div class="dimension-title">五维竞争力分析</div>
-    <div id="dims-content"></div>
-  </div>
-  <div class="result-sections" id="result-sections"></div>
-  <div style="text-align:center">
-    <button class="btn-restart" onclick="restartTest()">重新测评</button>
+  <div class="res-body">
+    <div class="res-grid">
+      <div class="panel">
+        <div class="panel-hd"><span class="panel-lbl">Dimension Breakdown</span><span class="panel-ttl">五维竞争力</span></div>
+        <div class="panel-bd" id="dimbars"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><span class="panel-lbl">Radar Profile · 五维雷达图</span></div>
+        <div class="illus-wrap" id="rillus"></div>
+      </div>
+    </div>
+    <div class="res-sections" id="rsections"></div>
+    <div class="disclaimer">※ 本测评基于教育部推免政策与各高校公开招生数据构建，结果仅供参考，不构成任何录取保证。实际录取受专业方向、当年名额、导师意向等多重因素影响，建议结合目标院校最新招生简章综合判断。</div>
+    <div style="text-align:center"><button class="btn-restart" onclick="restartTest()">↺ 重新测评</button></div>
   </div>
 </div>
 
 <script>
-// ============================================================
-// QUESTIONS — 40 questions, 5 dimensions, 8 each
-// dim: academic, english, research, competition, softskill
-// Score 1=完全不符合, 5=完全符合 (higher = better for 保研)
-// ============================================================
-const QUESTIONS = [
-  // ── 维度一：学业基础 (8 questions) ──
-  { dim:'academic', text:'我的本科就读院校为985工程高校（包含C9联盟院校）', dimLabel:'学业基础' },
-  { dim:'academic', text:'我的专业综合成绩排名进入所在院系前10%以内', dimLabel:'学业基础' },
-  { dim:'academic', text:'我的GPA达到3.7/4.0以上，或加权均分在88分以上', dimLabel:'学业基础' },
-  { dim:'academic', text:'大学前三年学习中，我从未出现挂科或补考记录', dimLabel:'学业基础' },
-  { dim:'academic', text:'我的核心专业主干课程成绩普遍在90分以上', dimLabel:'学业基础' },
-  { dim:'academic', text:'我对申请方向所需的核心专业知识掌握扎实，基础深厚', dimLabel:'学业基础' },
-  { dim:'academic', text:'我在本科期间获得过国家奖学金，或省级、校级最高荣誉奖项', dimLabel:'学业基础' },
-  { dim:'academic', text:'我所在本科院校的该专业保研比例在10%以上，竞争基础良好', dimLabel:'学业基础' },
+const DIMS={
+  academic:   {label:'学业背景', en:'ACADEMIC',    w:.35,c:'#0f3d8a'},
+  english:    {label:'英语能力', en:'ENGLISH',     w:.15,c:'#1a5c3a'},
+  research:   {label:'科研经历', en:'RESEARCH',    w:.30,c:'#6b21a8'},
+  competition:{label:'竞赛荣誉', en:'COMPETITION', w:.10,c:'#92400e'},
+  softskill:  {label:'申请软实力',en:'SOFT SKILLS',w:.10,c:'#0e7490'},
+};
+const DORDER=['academic','english','research','competition','softskill'];
+const BASE_COLORS={academic:'37,99,235',english:'22,163,74',research:'124,58,237',competition:'234,88,12',softskill:'8,145,178'};
 
-  // ── 维度二：英语能力 (8 questions) ──
-  { dim:'english', text:'我已通过大学英语六级考试（CET-6），并取得合格成绩', dimLabel:'英语能力' },
-  { dim:'english', text:'我的六级成绩在520分以上，或雅思6.5+，或托福90+', dimLabel:'英语能力' },
-  { dim:'english', text:'我能用英语进行流畅的自我介绍，持续表述2分钟以上不间断', dimLabel:'英语能力' },
-  { dim:'english', text:'我能独立阅读英文学术论文，理解其核心论点和研究方法', dimLabel:'英语能力' },
-  { dim:'english', text:'我专门练习过英文面试，能用英语回答专业相关问题', dimLabel:'英语能力' },
-  { dim:'english', text:'我具备一定的英文学术写作能力，能撰写摘要或短文', dimLabel:'英语能力' },
-  { dim:'english', text:'我在日常学习中习惯查阅英文文献，熟悉学术英语语境', dimLabel:'英语能力' },
-  { dim:'english', text:'我了解并能英文表述申请方向的核心术语和概念框架', dimLabel:'英语能力' },
-
-  // ── 维度三：科研经历 (8 questions) ──
-  { dim:'research', text:'我在本科期间正式加入了导师课题组，参与真实科研项目', dimLabel:'科研经历' },
-  { dim:'research', text:'我以核心成员身份完成或正在进行国家级大创/SRTP等科研项目', dimLabel:'科研经历' },
-  { dim:'research', text:'我已以作者身份发表或投稿学术论文（含中文核心/SCI/EI）', dimLabel:'科研经历' },
-  { dim:'research', text:'我已主动联系目标院校心仪导师，并收到积极回应或表示意向', dimLabel:'科研经历' },
-  { dim:'research', text:'我能清晰阐述自己的研究兴趣，并有具体的研究方向规划', dimLabel:'科研经历' },
-  { dim:'research', text:'我持续关注申请方向的前沿研究，了解近年的重要进展', dimLabel:'科研经历' },
-  { dim:'research', text:'我具备独立设计并开展小型研究实验或调查的实际能力', dimLabel:'科研经历' },
-  { dim:'research', text:'我参加过学术会议、研讨会，或在公开场合做过学术报告', dimLabel:'科研经历' },
-
-  // ── 维度四：竞赛荣誉 (8 questions) ──
-  { dim:'competition', text:'我获得过国家级学科竞赛奖项（美赛/挑战杯国赛/互联网+国赛等）', dimLabel:'竞赛荣誉' },
-  { dim:'competition', text:'我获得过省级以上、与专业高度相关的竞赛奖项', dimLabel:'竞赛荣誉' },
-  { dim:'competition', text:'我参加并获奖于校级以上创新创业或专业类学科竞赛', dimLabel:'竞赛荣誉' },
-  { dim:'competition', text:'我获得过校级以上荣誉称号（三好学生、优秀学生干部等）', dimLabel:'竞赛荣誉' },
-  { dim:'competition', text:'我的竞赛参赛方向与目标申请方向有较强的相关性', dimLabel:'竞赛荣誉' },
-  { dim:'competition', text:'我在获奖项目中担任负责人或核心主力成员（非仅名义挂名）', dimLabel:'竞赛荣誉' },
-  { dim:'competition', text:'我的竞赛获奖经历能在申请简历和面试中体现出明显加分效果', dimLabel:'竞赛荣誉' },
-  { dim:'competition', text:'我曾参加过目标高校或相关机构举办的专业赛事或学术活动', dimLabel:'竞赛荣誉' },
-
-  // ── 维度五：申请软实力 (8 questions) ──
-  { dim:'softskill', text:'我已完成高质量的个人简历，并针对目标院校做了定制化优化', dimLabel:'申请软实力' },
-  { dim:'softskill', text:'我已获得至少2封副教授以上级别导师的推荐信（含本校导师）', dimLabel:'申请软实力' },
-  { dim:'softskill', text:'我参加过目标高校的夏令营，并成功获得入营资格或优秀营员', dimLabel:'申请软实力' },
-  { dim:'softskill', text:'我对目标院校的招生政策、往年录取数据和拟申请导师了如指掌', dimLabel:'申请软实力' },
-  { dim:'softskill', text:'我有过科研机构、知名企业或行业头部单位的正式实习经历', dimLabel:'申请软实力' },
-  { dim:'softskill', text:'我的个人陈述（PS）已经过多轮修改，主题突出、逻辑完整清晰', dimLabel:'申请软实力' },
-  { dim:'softskill', text:'我制定了科学的院校梯队方案（冲刺/稳妥/保底分层投递）', dimLabel:'申请软实力' },
-  { dim:'softskill', text:'我参加过保研模拟面试训练，或有系统性的面试准备经验', dimLabel:'申请软实力' },
+const Q=[
+{d:'academic',t:'choice',q:'您目前就读（或毕业）的本科院校属于哪个层次？',n:'院校层次是顶尖高校初审最重要的参考依据之一，清北等C9生源在竞争同一层次院所时具有系统性优势。',opts:[{k:'A',t:'清华大学 / 北京大学',s:40},{k:'B',t:'其余C9院校（复旦·上交·浙大·南大·中科大·哈工大·西安交大）',s:32},{k:'C',t:'其他985工程院校（非C9，共30所）',s:22},{k:'D',t:'211工程院校（非985，约100所）',s:12},{k:'E',t:'其他本科院校（双非一本及以下）',s:4}]},
+{d:'academic',t:'choice',q:'您的加权平均分或绩点处于哪个区间？',n:'90分以上/3.8+在顶尖985院所中具有明显竞争力；85分以下在清北级院所申请时基本失去竞争资格。',opts:[{k:'A',t:'90分及以上 / GPA 3.8+（4.0制）或 3.9+（4.3制）',s:30},{k:'B',t:'87–89分 / GPA 3.6–3.8（4.0制）',s:22},{k:'C',t:'83–86分 / GPA 3.3–3.6（4.0制）',s:13},{k:'D',t:'80–82分 / GPA 3.0–3.3（4.0制）',s:6},{k:'E',t:'80分以下 / GPA 3.0以下',s:1}]},
+{d:'academic',t:'choice',q:'您的专业综合排名约处于所在专业年级的哪个位置？',n:'推免资格通常覆盖前10%–20%，排名前5%在同等院校申请者中具有明显区分度。',opts:[{k:'A',t:'前 5%',s:30},{k:'B',t:'5%–10%',s:22},{k:'C',t:'10%–20%',s:13},{k:'D',t:'20%–35%',s:5},{k:'E',t:'35% 以后',s:1}]},
+{d:'academic',t:'binary',q:'本科期间是否获得过国家奖学金？',n:'国家奖学金名额为全年级前0.2%，是具有全国统一认可度的学业成就背书，在简历上有显著权重。',y:{t:'是，已获得国家奖学金',s:20},no:{t:'否，未获得',s:0}},
+{d:'academic',t:'binary',q:'本科期间是否存在任何科目的期末不及格（挂科）记录？',n:'部分院所明确将"无不及格记录"列为推免申请必要条件，挂科记录可能导致材料审核直接淘汰。',y:{t:'有挂科或补考记录',s:0},no:{t:'无任何不及格记录',s:10}},
+{d:'academic',t:'trinary',q:'您所在专业在全国同专业中的学科评估排名大约处于哪一档？',n:'教育部学科评估A类（A+/A/A-）是衡量专业背景含金量的重要参照，直接影响简历的初步印象。',opts:[{l:'强势背景',t:'所在专业获评A类（A+/A/A-），或进入全国前10%',s:20,c:'sel-h'},{l:'中等背景',t:'所在专业获评B类，或处于全国10%–30%区间',s:10,c:'sel-m'},{l:'一般背景',t:'所在专业B类以下，或院校无学科评估数据',s:3,c:'sel-l'}]},
+{d:'academic',t:'binary',q:'您在本科阶段是否以学生代表身份参与过学院或学校层面的荣誉答辩、评奖评优，并取得结果？',n:'综合素质测评排名与校级荣誉答辩是本校保研名额分配的重要参考，同样反映综合竞争能力。',y:{t:'是，参与过综合素质评优并取得名次',s:10},no:{t:'否，未参与或无结果',s:0}},
+{d:'academic',t:'trinary',q:'您是否曾辅修第二学位、荣誉学院项目，或参加本科生研究项目（URP）？',n:'双学位、荣誉项目或URP体现出超出普通本科生的主动学术投入，在申请材料中具有一定加分作用。',opts:[{l:'有系统性额外项目',t:'荣誉学院/双学位/URP/本科生研究计划，且已有成果',s:15,c:'sel-h'},{l:'有参与但无成果',t:'参与了辅修或URP，但未完整结项或无具体成果',s:6,c:'sel-m'},{l:'无',t:'未参与任何上述项目',s:0,c:'sel-l'}]},
+{d:'academic',t:'binary',q:'您本科就读院校（或所在学院）是否设有荣誉学院、拔尖基地班或强基计划？若有，您是否在其中就读？',n:'荣誉学院/基地班等精英培养项目对外传递出明确的"遴选信号"，在顶尖院所导师眼中具有额外可信度。',y:{t:'是，在荣誉/基地/强基班就读',s:10},no:{t:'否，普通班就读或院校无此项目',s:0}},
+{d:'english',t:'choice',q:'您目前最高有效英语成绩是以下哪项？',n:'部分985院所（尤其理工科）将六级500分以上作为隐性材料筛选线，TOEFL/IELTS高分在理科顶尖院所具有加分效果。',opts:[{k:'A',t:'TOEFL 100+ / IELTS 7.0+ / GRE 325+',s:40},{k:'B',t:'六级 580+ / TOEFL 90–99 / IELTS 6.5',s:32},{k:'C',t:'六级 520–579',s:22},{k:'D',t:'六级 450–519 / 四级 600+',s:12},{k:'E',t:'六级 450以下 / 仅四级合格',s:3}]},
+{d:'english',t:'trinary',q:'您的英语口语与面试表达能力处于哪个层次？',n:'绝大多数重点院所面试含英文自我介绍或专业问答（2–8分钟），准备充分者可将此环节转化为竞争优势。',opts:[{l:'充分备战',t:'可流利进行英文自我介绍、科研陈述，并应对专业英文问题',s:30,c:'sel-h'},{l:'基础水平',t:'能完成简单英文表达，但面试时有明显卡顿或术语障碍',s:13,c:'sel-m'},{l:'明显薄弱',t:'英语口语是显著短板，未做系统面试准备',s:2,c:'sel-l'}]},
+{d:'english',t:'binary',q:'您是否能独立精读英文学术论文（包括理解方法论、公式推导或实验设计），而不仅仅是摘要？',n:'英文文献精读能力是高水平科研的基础前提，也是导师在面试中判断学生科研准备度的重要依据。',y:{t:'是，可独立精读并理解核心内容',s:20},no:{t:'否，精读有较大困难',s:3}},
+{d:'english',t:'binary',q:'您是否参加过全英文授课课程、英文学术讲座或国际学生交流项目，并有相关证明材料？',n:'全英授课经历或国际交流背景在简历中可直接佐证英语实用能力，对申请部分国际化院所有额外价值。',y:{t:'是，有相关经历及证明',s:10},no:{t:'否，无上述经历',s:0}},
+{d:'english',t:'binary',q:'您是否曾以英文撰写过学术报告、课程论文，或完整翻译过英文文献中的某一章节？',n:'英文学术写作能力与精读能力同等重要，体现出真实的学术英语使用经验。',y:{t:'是，有英文学术写作经历',s:10},no:{t:'否，尚无此类经历',s:0}},
+{d:'english',t:'trinary',q:'您申请目标院所所在城市（或国内学术交流环境）是否对您的英语能力提出特别要求？',n:'上海/北京等城市顶尖院所（如上交、复旦、北航等部分方向）对英语综合能力要求相对更高。',opts:[{l:'高要求方向',t:'目标方向明确要求高英语水平（如国际联培、全英文培养项目）',s:10,c:'sel-h'},{l:'常规要求',t:'英语是考察点之一，但无特殊高门槛要求',s:6,c:'sel-m'},{l:'非核心要求',t:'英语在申请评价中权重较低（如部分中文为主的人文社科方向）',s:3,c:'sel-l'}]},
+{d:'research',t:'choice',q:'您目前最高水平的学术成果（以第一作者或共同第一作者计）达到哪个层次？',n:'顶尖院所科研评价核心依据：SCI一区/CCF-A类论文可完全突破院校层次限制，是最具含金量的竞争要素。',opts:[{k:'A',t:'SCI一区/二区全文论文（含已录用），或CCF-A类会议',s:40},{k:'B',t:'SCI三区/四区，或EI检索全文，或CCF-B类会议',s:30},{k:'C',t:'中文核心/CSSCI/北大核心，或国内顶尖期刊会议',s:20},{k:'D',t:'有稿件在投/在审，尚未录用，或有预印本',s:10},{k:'E',t:'无论文发表，仅有课程作业性质报告',s:1}]},
+{d:'research',t:'binary',q:'您是否正式加入过导师课题组，并承担过具体子课题、实验模块或数据分析等实质性工作？',n:'"进组"和"真正参与科研"是截然不同的概念——面试中导师会追问具体贡献，浅层参与在追问下容易露馅。',y:{t:'是，承担了具体科研任务并可详述工作内容',s:20},no:{t:'否，尚未进入课题组参与实质性科研',s:0}},
+{d:'research',t:'choice',q:'您参与的大学生创新创业训练项目（大创/SRTP/本研一体等）最高达到哪个级别？',n:'国家级大创结题是规范化科研经历的重要证明，其含金量在简历审核中明显优于校级项目。',opts:[{k:'A',t:'国家级立项，已结题并验收通过',s:20},{k:'B',t:'国家级立项，在研或未结题',s:13},{k:'C',t:'省级立项（已结题或在研）',s:8},{k:'D',t:'校级立项',s:4},{k:'E',t:'未参与或仅为非正式自研',s:0}]},
+{d:'research',t:'binary',q:'您是否已主动联系目标院所的意向导师，并获得积极回应（导师明确表示欢迎申请或邀请参加考核）？',n:'"套磁成功"可在材料审核阶段前建立优先印象，在竞争激烈时对录取结果的影响不可忽视。',y:{t:'是，已获得一位或多位导师的积极意向',s:20},no:{t:'否，尚未联系或未收到积极回应',s:0}},
+{d:'research',t:'trinary',q:'您对申请研究方向的近两年学术前沿（代表性论文、热点问题、主要争议）了解程度如何？',n:'面试中"前沿追踪深度"是顶尖院所区分优质申请者与普通申请者最常用的考察维度。',opts:[{l:'持续深度追踪',t:'熟悉领域代表性工作，了解主要争议与当前研究空白，有个人见解',s:20,c:'sel-h'},{l:'整体了解',t:'对研究方向有整体把握，但未系统研读具体近期论文',s:8,c:'sel-m'},{l:'了解有限',t:'主要依赖课堂内容，未主动追踪前沿进展',s:1,c:'sel-l'}]},
+{d:'research',t:'binary',q:'您是否持有发明专利（申请中或已授权），或参与过国家级、省部级纵向科研课题（有正式立项文件）？',n:'发明专利或省部级以上课题参与记录在理工科申请中具有较高证明价值，尤其在工程类院所。',y:{t:'是，持有发明专利或参与了省部级以上课题',s:15},no:{t:'否，无上述经历',s:0}},
+{d:'research',t:'trinary',q:'您能否清晰地阐述自己的科研经历——包括问题背景、您的具体贡献、结论意义，并应对追问？',n:'科研叙事能力（Research Narrative）是面试评分的核心，表达混乱的好经历远不如表达清晰的一般经历。',opts:[{l:'叙事完整清晰',t:'可条理清晰地介绍科研背景、个人贡献和成果，面对追问不慌乱',s:20,c:'sel-h'},{l:'大致能表达',t:'能讲清楚做了什么，但深度追问时会有逻辑混乱或遗漏',s:9,c:'sel-m'},{l:'叙事不完整',t:'经历本身较为浅薄，或无法清晰呈现自己的具体贡献',s:1,c:'sel-l'}]},
+{d:'research',t:'binary',q:'您是否参加过学术会议（含学生论坛），并以口头报告或海报展示形式汇报了自己的研究工作？',n:'会议展示经历——无论级别高低——证明了你的科研已达到可公开汇报的完成度，面试中有实质证明效果。',y:{t:'是，有过会议汇报或海报展示经历',s:10},no:{t:'否，尚无会议展示经历',s:0}},
+{d:'research',t:'binary',q:'您是否完整阅读过目标方向近两年发表的5篇以上代表性论文，并能说出各自的核心贡献？',n:'真正"精读过论文"与"看过摘要/综述"在面试追问中差距极大，这是判断科研深度最有效的自测标准之一。',y:{t:'是，精读过5篇以上并可说明贡献',s:10},no:{t:'否，尚未达到此深度',s:0}},
+{d:'research',t:'trinary',q:'您在科研过程中对某个具体问题是否形成了自己的学术见解或研究假设，而非单纯执行导师指令？',n:'独立学术思维是区分"科研助手"与"独立科研者"的关键，顶尖导师在面试中普遍将此作为最优先考察指标。',opts:[{l:'有独立学术见解',t:'有过独立提出问题、设计方案或质疑已有结论的真实经历',s:15,c:'sel-h'},{l:'半独立',t:'在导师框架内有一定主动思考，但尚未形成独立研究判断',s:7,c:'sel-m'},{l:'执行为主',t:'主要按导师指示执行，尚未形成独立学术判断',s:1,c:'sel-l'}]},
+{d:'competition',t:'choice',q:'您获得过的最高级别学术竞赛或科技创新类赛事奖项是？',n:'含金量参考：美赛O奖/F奖≈挑战杯国赛特等≈互联网+国赛金奖 > 省级赛事一等奖 > 校级。',opts:[{k:'A',t:'国际级或国内顶级赛事（美赛O/F奖、挑战杯国赛特/一等、互联网+国赛金奖、ACM-ICPC国际赛奖牌等）',s:40},{k:'B',t:'国家级竞赛奖项（挑战杯国赛二/三等、数模国赛一等、各类全国专业竞赛一等奖等）',s:30},{k:'C',t:'省级赛事一/二等奖，或国家级赛事三等奖/参赛奖',s:18},{k:'D',t:'校级竞赛奖项，或省级赛事三等奖/参赛奖',s:7},{k:'E',t:'暂无竞赛获奖经历',s:0}]},
+{d:'competition',t:'binary',q:'您最具含金量的竞赛经历与您申请的研究方向是否具有明确的专业相关性？',n:'方向不相关的竞赛（如英语演讲、创业类）对科研导向的申请加分有限；专业相关竞赛才能真正支撑科研能力叙事。',y:{t:'是，竞赛与申请方向高度相关',s:20},no:{t:'否，竞赛与申请方向关联不强',s:5}},
+{d:'competition',t:'binary',q:'在团队竞赛中，您是否担任队长或核心主力角色，并能清楚描述自己在比赛中的技术贡献？',n:'导师面试中会追问"你负责了哪部分"——挂名参与者在追问下容易暴露，而核心贡献者可借此强化科研能力印象。',y:{t:'是，担任队长或核心主力，贡献明确',s:20},no:{t:'否，以配合/辅助角色参与为主',s:5}},
+{d:'competition',t:'binary',q:'您是否连续参加过同一赛事（如每年参加数学建模、挑战杯等），并在不同年度中持续取得成绩？',n:'持续性竞赛参与比一次偶发获奖更能体现对该领域的持续投入，在一定程度上更能说明真实能力。',y:{t:'是，连续参与并持续取得成绩',s:10},no:{t:'否，单次参与或成绩不稳定',s:0}},
+{d:'competition',t:'binary',q:'您的竞赛获奖证书是否均已准备好数字版扫描件，并附有正式盖章或可在官方平台查证？',n:'竞赛证书可核验性直接影响其在材料审查中的有效性，无法核查的证书在正规院校审核中等同无效。',y:{t:'是，证书齐全且可核验',s:10},no:{t:'否，尚未整理或部分无法核验',s:0}},
+{d:'softskill',t:'choice',q:'您计划参加目标院所夏令营，目前准备程度如何？',n:'夏令营是绝大多数顶尖院所的主要录取通道。充分的材料准备和有针对性的套磁是入营的核心前提。',opts:[{k:'A',t:'材料全部就绪，已研究目标院所历年入营标准并定制申请材料',s:40},{k:'B',t:'核心材料（CV/PS/成绩单）基本准备完毕，正在针对性完善',s:24},{k:'C',t:'开始准备材料，但尚未系统研究各院所入营要求',s:10},{k:'D',t:'尚未开始准备夏令营申请材料',s:1}]},
+{d:'softskill',t:'choice',q:'您已准备好或可获得的推荐信来自哪个级别的教师？',n:'推荐信的实质价值取决于推荐人在目标院所圈内的学术影响力，以及其与申请人的真实了解程度。通用模板信效果极差。',opts:[{k:'A',t:'目标院所可认可的知名教授（博导），且与本人有真实科研合作经历',s:25},{k:'B',t:'本校博导/教授，对本人有真实深入了解',s:18},{k:'C',t:'副教授/讲师，有课程或科研接触',s:10},{k:'D',t:'尚未联系推荐人，或仅有通用模板推荐信',s:1}]},
+{d:'softskill',t:'trinary',q:'您的个人陈述（PS/研究计划）完成度和质量如何？',n:'PS是简历中唯一可展示研究逻辑和学术热情的文本，顶尖院所审核时间虽短，但高质量PS确实产生可量化的区分效果。',opts:[{l:'精细完成',t:'针对不同院所/导师定制化，逻辑清晰、研究问题明确、个人特色突出',s:20,c:'sel-h'},{l:'初稿完成',t:'有基础版本在手，逻辑基本完整，但差异化和定制化不足',s:9,c:'sel-m'},{l:'尚未完成',t:'尚未开始，或仅有通用模板，无针对性内容',s:0,c:'sel-l'}]},
+{d:'softskill',t:'binary',q:'您是否系统研究过目标院所近3年的录取数据（含入营标准、通过率、生源结构）并据此调整了申请策略？',n:'数据驱动的申请策略可以显著提高综合录取概率——许多申请失败源于院校选择不合理，而非竞争力本身不足。',y:{t:'是，已做过系统调研并有针对性的梯队方案',s:10},no:{t:'否，尚未系统分析招生数据',s:0}},
+{d:'softskill',t:'binary',q:'您是否已经规划了完整的申请时间节点（夏令营报名截止、预推免开放时间、各校面试时间冲突处理）？',n:'夏令营和预推免时间密集重叠，提前规划时间节点可避免因信息疏漏错过关键窗口。',y:{t:'是，已有完整时间轴规划',s:5},no:{t:'否，尚未做详细时间规划',s:0}},
 ];
 
-// Dimension config with weights
-const DIM_CONFIG = {
-  academic:    { label:'学业基础', enLabel:'ACADEMIC',    weight:0.35, color:'#2c4a6e', indices:[]},
-  english:     { label:'英语能力', enLabel:'ENGLISH',     weight:0.20, color:'#4a6a2e', indices:[]},
-  research:    { label:'科研经历', enLabel:'RESEARCH',    weight:0.25, color:'#6a2c4a', indices:[]},
-  competition: { label:'竞赛荣誉', enLabel:'COMPETITION', weight:0.10, color:'#7a4a1c', indices:[]},
-  softskill:   { label:'申请软实力', enLabel:'SOFT SKILLS', weight:0.10, color:'#2a5a5a', indices:[]},
-};
-QUESTIONS.forEach((q,i) => { DIM_CONFIG[q.dim].indices.push(i); });
-const DIM_ORDER = ['academic','english','research','competition','softskill'];
-const DIM_INDICATORS = {
-  academic: '维度一 · 学业基础',
-  english: '维度二 · 英语能力',
-  research: '维度三 · 科研经历',
-  competition: '维度四 · 竞赛荣誉',
-  softskill: '维度五 · 申请软实力',
-};
-
-// ============================================================
-// TIER RESULTS DATABASE
-// ============================================================
-const TIERS = [
-  {
-    minScore: 72,
-    tierBadge: 'TIER 1 · PEAK LEVEL',
-    schoolLevel: '清北·科院级',
-    summary: '顶尖旗舰，问鼎巅峰',
-    tagline: 'TSINGHUA · PEKING UNIVERSITY · UCAS',
-    targetSchools: ['清华大学','北京大学','中国科学院大学','中国社会科学院大学'],
-    altSchools: ['北京大学','清华大学','中国科学院大学'],
-    population: '约5%',
-    populationNote: '保研申请者中约5%可达此竞争力',
-    scoreRange: '72 - 100',
-    svgId: 'tier1',
-    profile: `你的综合测评成绩位于最顶尖区间。这意味着你在学业成绩、英语能力、科研积累和申请准备各个维度均达到了接近满配的水准——而这正是清华、北大、中国科学院大学等顶尖机构初审筛选中所期待的标准。
-
-顶尖院校的录取逻辑不仅是"优中选优"，更是寻找具有真正科研热情和学术潜质的苗子。夏令营入营通常要求专业排名前5%，有论文或国家级竞赛经历，英语口语具备真实的学术交流能力。你当前的画像与这一标准高度吻合。`,
-    strengths: '全维度综合实力突出；科研经历具有说服力；英语能力满足国际化要求；院校背景与目标院校层次匹配；申请材料完备度高。',
-    strategy: `精准定位：建议将3-4所顶尖院校作为主攻目标，同时在华五强校设保底。夏令营阶段应重点打磨科研陈述和面试表达，将你的研究经历叙事化，让导师看见你的"研究品味"而非仅仅是成绩。预推免阶段务必提前联系意向导师，争取在9月系统开放前锁定offer。`,
-    actions: [
-      '尽早投递目标院校夏令营报名（通常3-6月），材料精雕细刻',
-      '系统准备英文自我介绍、英文专业问答（每天15分钟练习）',
-      '打磨科研陈述逻辑：问题→方法→发现→意义，控制在5分钟内',
-      '与意向导师建立邮件联系，展示研究兴趣的匹配度',
-      '模拟5轮以上压力面试，尤其练习被问"为什么选我们学校"',
-    ],
-  },
-  {
-    minScore: 58,
-    tierBadge: 'TIER 2 · ELITE LEVEL',
-    schoolLevel: '华五·顶尖985级',
-    summary: '精英梯队，实力雄厚',
-    tagline: 'FUDAN · SJTU · ZJU · USTC · NJU',
-    targetSchools: ['复旦大学','上海交通大学','浙江大学','中国科学技术大学','南京大学','北京航空航天大学','北京师范大学'],
-    altSchools: ['复旦大学','上交大','浙大','中科大','南大'],
-    population: '约15%',
-    populationNote: '保研申请者中约15%可具备此竞争力',
-    scoreRange: '58 - 71',
-    svgId: 'tier2',
-    profile: `你的综合评估显示出强劲的保研竞争实力，与华五（复旦、上交、浙大、中科大、南大）以及北航、北师大等顶尖985高校的录取画像高度匹配。
-
-这一层次的录取竞争极为激烈。以复旦大学为例，申请者中985院校比例超过70%，夏令营入营率通常低于30%。你的优势在于具备扎实的多维度背景，但在竞争中脱颖而出的关键，往往是那个独特的"亮点"——一篇论文、一个深度项目、一段让导师眼前一亮的研究经历。`,
-    strengths: '核心维度竞争力充足；院校背景与英语能力具备基础支撑；有一定科研积累；申请材料整体完善。',
-    strategy: `建议将华五中2-3所作为主冲目标，同时投递2-3所同层次强985（如哈工大、武大、中山）作为梯队稳妥选择，并保留1-2所本校或本地985保底。申请材料中，请用"数据+故事"的方式呈现科研经历，避免流水账式描述。`,
-    actions: [
-      '聚焦科研经历的深度叙事，有论文则重点展示研究贡献',
-      '系统研究每所目标院校的导师研究方向，撰写个性化PS',
-      '提高英语面试流利度，准备10个高频学术面试问题的回答模板',
-      '夏令营报名策略：冲顶2所 + 稳妥3所 + 保底2所',
-      '如排名边缘，可提前联系1-2位目标导师表达意向',
-    ],
-  },
-  {
-    minScore: 44,
-    tierBadge: 'TIER 3 · STRONG LEVEL',
-    schoolLevel: '强势985级',
-    summary: '实力稳健，冲刺有望',
-    tagline: 'HIT · WHU · SYSU · TONGJI · HUST',
-    targetSchools: ['哈尔滨工业大学','武汉大学','中山大学','同济大学','华中科技大学','厦门大学（部分专业）','北京理工大学','东南大学'],
-    altSchools: ['哈工大','武大','中山大学','同济','华科'],
-    population: '约25%',
-    populationNote: '保研申请者中约25%处于此竞争区间',
-    scoreRange: '44 - 57',
-    svgId: 'tier3',
-    profile: `你的综合评分落在稳健实力区间，与哈工大、武汉大学、中山大学、同济大学、华中科技大学等强势985高校的录取画像相符。
-
-这一层次院校同样竞争激烈，但与华五相比，它们在招生过程中更看重学生与具体方向的匹配度，而非单纯的"精英光环"。你目前的画像已具备入营资格的基础条件，关键在于如何在面试中展现出超越成绩单的那一层实力——专业理解的深度、研究的主动性，以及清晰的未来规划。`,
-    strengths: '学业基础具备参赛资格；专业知识掌握较为扎实；有一定课外积累支撑简历；英语能力满足基本要求。',
-    strategy: `建议以强势985为主要申请目标（3-4所），同时冲击1-2所华五/顶尖985作为拔高选项，并设置稳妥的211保底选项。在这个层次，与导师提前建立联系的策略性价值极高——很多时候，一封真诚且显示出研究理解的邮件，可以在入营决策中产生关键作用。`,
-    actions: [
-      '加强与目标院校导师的邮件联系，展示对其研究的理解',
-      '提升科研叙事能力：即使经历不多，也要将现有经历提炼出深度',
-      '重点练习英文自我介绍和专业问答，达到流利+准确的水准',
-      '制作1份针对不同院校定制化的PS和简历版本',
-      '研究目标院校近3年的夏令营真题，有针对性地备考',
-    ],
-  },
-  {
-    minScore: 30,
-    tierBadge: 'TIER 4 · SOLID LEVEL',
-    schoolLevel: '优势211级',
-    summary: '基础稳固，积蓄动能',
-    tagline: 'XMU · NNU · SCU · DLUT · CSU',
-    targetSchools: ['厦门大学','南京师范大学','苏州大学','四川大学（部分）','大连理工大学','中南大学','西南大学','华南农业大学（强势专业）'],
-    altSchools: ['厦大','南师大','苏大','川大','中南大学'],
-    population: '约30%',
-    populationNote: '保研申请者中约30%处于此竞争区间',
-    scoreRange: '30 - 43',
-    svgId: 'tier4',
-    profile: `你的测评结果显示出具备保研基础但综合竞争力尚待全面提升的特征，当前画像与厦门大学、南京师范、苏州大学、大连理工等优势211高校的录取要求较为匹配。
-
-在这个层次，有很多逆袭的机会。部分211高校在特定专业方向上实力极强，且录取竞争远比顶尖985温和。同时，预推免阶段（9月正式开放后）是重要的弥补窗口——初期未能拿到offer的学生，往往在预推免阶段找到了出路。`,
-    strengths: '已具备保研基本资格；专业基础达到院校要求；部分维度有提升空间；选择范围灵活多样。',
-    strategy: `务必"冲稳保"三档布局：冲击2所有可能的强985（利用特定专业优势）；重点攻坚3-4所目标211；保留本校或强双非的优势学科作为底线。同时建议立即开始强化短板维度，尤其是科研经历和英语能力，这两项在接下来数月内仍有可观的提升空间。`,
-    actions: [
-      '立即评估本校保研资格名额，确保内推资格的稳定性',
-      '接触并加入导师课题组，哪怕是协助性工作，也要开始积累',
-      '大幅提升英语口语，英语是投入产出比最高的短期可提升项',
-      '深度研究目标211的专业排名和具体招生要求，发掘优势方向',
-      '提前规划9月预推免申请，备好完整申请材料',
-    ],
-  },
-  {
-    minScore: 16,
-    tierBadge: 'TIER 5 · DEVELOPING LEVEL',
-    schoolLevel: '双非·冲击211级',
-    summary: '厚积薄发，逆袭可期',
-    tagline: 'REGIONAL KEY · STRONG DOUBLE-NON',
-    targetSchools: ['各省属重点高校优势学科','强势双非院校（如部分医学院/艺术院校）','本校保研（如具备资格）','部分211弱势专业'],
-    altSchools: ['省属重点高校','强势双非','本校深造'],
-    population: '约20%',
-    populationNote: '保研申请者中约20%处于此发展阶段',
-    scoreRange: '16 - 29',
-    svgId: 'tier5',
-    profile: `你目前的综合评估显示，在部分核心维度上仍存在需要补足的短板。但请记住：保研的结果，从来不只由当下的评分决定——它由接下来数月的努力决定。
-
-很多双非学生凭借强势的科研产出（一篇核心论文往往可以"提档"2-3个层次）和扎实的面试表现，最终突破了院校背景的限制。同时，部分高校明确对双非优秀学生开放招募通道，预推免阶段的机会比夏令营更为公平。`,
-    strengths: '已迈出保研准备的第一步；某些维度具备局部优势；充裕的时间窗口仍可大幅改善竞争力。',
-    strategy: `当前最重要的是集中资源突破一到两个关键短板。优先建议：（1）尽一切努力进入实验室，争取科研产出；（2）系统备考六级和英文面试；（3）主动联系目标院校中对双非学生相对友好的导师。同时，考虑将本校保研（如具备资格）作为坚实底线，避免无谓的冒险。`,
-    actions: [
-      '立即确认本校推免资格：了解本专业保研名额和评选标准',
-      '最高优先级：进入实验室参与科研，哪怕大三下也不晚',
-      '专项突破英语：六级+英文面试，4个月内可实现显著提升',
-      '深研1-2所对双非学生友好的目标院校（部分院校明确欢迎）',
-      '准备预推免申请材料，9月系统开放后积极投递未招满院校',
-    ],
-  },
-  {
-    minScore: 0,
-    tierBadge: 'TIER 6 · BUILDING LEVEL',
-    schoolLevel: '全力蓄势·重塑起点',
-    summary: '每一步积累，皆有意义',
-    tagline: 'EVERY EFFORT RESHAPES THE DESTINATION',
-    targetSchools: ['本校研究生院','各地方高校对口专业','跨专业保研（如具备亮点经历）','考研作为平行选项'],
-    altSchools: ['本校深造','地方院校','跨校考研'],
-    population: '较少比例',
-    populationNote: '测评显示综合竞争力仍需全面提升',
-    scoreRange: '0 - 15',
-    svgId: 'tier6',
-    profile: `当前测评结果揭示出你在多个关键维度上与目标院校的要求之间存在较大差距。这是一个需要正视的现实，但更是一个清晰的行动信号。
-
-保研并非唯一的路径。如果时间窗口有限，同步准备考研是完全理性的策略——事实上，很多最终通过保研升学的学生，都曾在大三并行备考，这不是退路，而是把选择权握在自己手中。同时，在剩余时间内，每一个真实的改变——哪怕是一份实验室参与记录、一次认真的竞赛经历——都在重写你的竞争画像。`,
-    strengths: '认识现状是改变的起点；仍有时间窗口进行针对性补强；部分院校及方向对综合条件要求相对灵活。',
-    strategy: `建议立即启动双轨并行方案：保研准备与考研备考同步推进。保研端：集中改善1-2个关键维度（优先科研经历和英语），制定本校保研资格争取方案。考研端：尽早确定备考科目，利用保研结果出来前的时间高效备考，无论最终走哪条路，都不白费。`,
-    actions: [
-      '立即启动"保研+考研"双轨准备，制定详细的时间分配表',
-      '全力争取本校推免资格，这是性价比最高的第一目标',
-      '进入任何一个实验室：哪怕是志愿性质，也能改写简历',
-      '4个月内专项突破六级：达到425分是最低门槛，越高越好',
-      '联系辅导员和学长学姐，了解本校保研的真实操作流程',
-    ],
-  },
+const TIERS=[
+  {min:82,id:'t1',tag:'TIER Ⅰ · APEX',name:'清北档',sub:'Tsinghua · PKU University',chips:['清华大学','北京大学'],pop:'约 3–5%',profile:'综合评分进入最顶尖区间。清北夏令营入营率通常低于10%，竞争者以C9本科为主。你的画像已具备入局资格，关键在于科研叙事深度和英文面试表现。',strategy:'主攻清北，保留2–3所华五作稳妥梯队。套磁须体现真实的研究理解，而非模板邮件。英文面试和5分钟科研陈述是最高优先级备考项。',actions:['精研意向导师近3年论文，在套磁邮件中体现真实阅读深度','将科研经历提炼为"问题→贡献→意义"的完整叙事','每日15分钟英文口语练习，确保面试术语表达流利准确','准备至少5轮压力面试模拟，重点练习追问应对','夏令营报名前逐一核对材料完整性与格式规范']},
+  {min:65,id:'t2',tag:'TIER Ⅱ · ELITE',name:'华五·北航·南开 档',sub:'Fudan · SJTU · ZJU · USTC · NJU · BUAA · NKU',chips:['复旦大学','上海交通大学','浙江大学','中国科学技术大学','南京大学','北京航空航天大学','南开大学'],pop:'约 10–15%',profile:'综合评分对应华五及北航、南开等顶尖985的录取区间。这一层次985生源占比超过60%，竞争极为激烈，突围关键在于一个真实且有深度的科研亮点。',strategy:'主攻华五中2–3所+北航/南开等，同时投递2所强势985作稳妥梯队，保留1所本地985或本校保底。每份申请材料须针对导师方向定制化。',actions:['梳理科研经历中最核心的1个亮点，在PS首段重点呈现','每所学校PS须有至少30%定制化内容，体现对导师研究的了解','系统准备英语面试，重点练习科研方向相关专业词汇表达','研究目标院所近3年入营生源结构，调整院校选择策略','夏令营冲顶2所+稳妥3所+保底2所，按时间线逐步投递']},
+  {min:50,id:'t3',tag:'TIER Ⅲ · STRONG',name:'哈工大·武大·中山·同济·华科 档',sub:'HIT · WHU · SYSU · TONGJI · HUST · SEU',chips:['哈尔滨工业大学','武汉大学','中山大学','同济大学','华中科技大学','东南大学','西安交通大学','天津大学'],pop:'约 20–25%',profile:'综合评分对应哈工大、武大、中山、同济、华科等强985的录取区间。这一层次更看重与导师研究方向的匹配度，而非单纯的"精英光环"。主动套磁性价比极高。',strategy:'以强985为主攻（3–4所），冲击1–2所华五中研究方向匹配度高的院所，保留2所211优势学科方向作保底。',actions:['主动发送套磁邮件，展示对导师具体课题的真实理解（而非泛泛兴趣）','深研目标院所导师团队，选择方向最匹配的3–5位','提升科研叙事深度：哪怕经历有限，也要讲清楚逻辑链','针对9月预推免窗口提前准备候补投递方案','英文面试专项冲刺：重点提升流畅度，不背模板']},
+  {min:36,id:'t4',tag:'TIER Ⅳ · SOLID',name:'北理工·吉大·山大·重大·华南理工·电子科大 档',sub:'BIT · JLU · SDU · CQU · SCUT · UESTC',chips:['北京理工大学','吉林大学','山东大学','重庆大学','华南理工大学','电子科技大学','中南大学','四川大学'],pop:'约 25–30%',profile:'综合评分对应985末尾梯队的录取区间。这一层次整体竞争强度较上一档有所下降，但依然需要具备清晰的科研经历和达标的英语成绩。',strategy:'以此层985为主攻核心，同时冲击上一档中研究方向最匹配的1–2所，本校保研作为坚实底线。立即开始补强最弱的1–2个维度。',actions:['确认本校推免资格和名额竞争情况，确保内推资格不丢失','最高优先级：进入实验室参与真实科研（哪怕大三下也不晚）','英语六级专项突破：500分以上显著提升竞争力','针对此档院所逐一研究近年录取数据，找到最有胜算的投递组合','9月预推免窗口是重要补救机会，务必提前准备材料']},
+  {min:22,id:'t5',tag:'TIER Ⅴ · BUILD',name:'强势211·部分一流学科建设高校 档',sub:'Key 211 · First-class Discipline Universities',chips:['苏州大学','南京师范大学','上海大学','首都师范大学','西南大学','部分双一流建设高校优势学科'],pop:'约 20%',profile:'当前综合竞争力与部分强势211或具有一流学科的双非高校匹配。本校内推是最优先、最确定的路径。双轨并行（保研+考研）是最稳健的策略。',strategy:'以本校保研资格为第一目标，辅以3–4所目标211的夏令营投递。同步备考考研，保证在保研结果出来前不断复习节奏。',actions:['第一步：确认并锁定本校推免资格，这是目前最具确定性的路径','进入任何实验室参与科研，哪怕是协助性工作，也要开始积累','4个月内系统备考英语六级，达到500+分是关键节点','深入研究对双非学生相对友好的目标院所（部分985明确接受优秀双非生）','启动考研备考，双轨并行——保研结果出来前保持有效复习节奏']},
+  {min:0,id:'t6',tag:'TIER Ⅵ · START',name:'全力蓄势·重塑起点',sub:'Every Effort Reshapes the Destination',chips:['本校保研','地方重点高校','考研为主要路径','跨专业方向调整'],pop:'需系统提升',profile:'测评显示多个核心维度仍有较大提升空间。保研并非唯一路径——考研作为并行方案完全理性务实。每一个真实的进步都在重写你的竞争画像。',strategy:'立即启动保研+考研双轨方案：保研端集中突破英语和科研经历；考研端尽早确定目标和复习科目，在保研结果出来前保持有效备考节奏。',actions:['第一步：详细了解本校推免政策——这是当前最值得全力争取的目标','进入任何实验室开始参与科研，哪怕大三下也完全不晚','专项突破英语六级至425+（合格线）是最低目标，500+才有更多选择','向保研成功的学长/学姐请教本校评选的真实操作规则','启动考研复习，将保研和考研视为并行选项而非互斥选择']},
 ];
 
-// ============================================================
-// SVG SCHOOL BADGE ILLUSTRATIONS
-// ============================================================
-function getSchoolSVG(tierId) {
-  const svgs = {
-    tier1: `<svg width="200" height="220" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Tier 1: 清北级 — Classical Chinese University Gate (inspired by iconic college gates) -->
-      <!-- Stone base -->
-      <rect x="20" y="185" width="160" height="15" rx="1" fill="#2c4a6e" opacity="0.12" stroke="#2c4a6e" stroke-width="0.8"/>
-      <!-- Left pillar -->
-      <rect x="28" y="80" width="32" height="106" rx="2" fill="#2c4a6e" opacity="0.1" stroke="#2c4a6e" stroke-width="1"/>
-      <rect x="24" y="76" width="40" height="8" rx="1" fill="#2c4a6e" opacity="0.18" stroke="#2c4a6e" stroke-width="0.8"/>
-      <rect x="22" y="68" width="44" height="10" rx="1" fill="#2c4a6e" opacity="0.14" stroke="#2c4a6e" stroke-width="0.8"/>
-      <!-- Left pillar decoration -->
-      <rect x="32" y="90" width="4" height="80" rx="1" fill="#b8960c" opacity="0.2"/>
-      <rect x="24" y="72" width="14" height="2" fill="#b8960c" opacity="0.3"/>
-      <rect x="42" y="72" width="14" height="2" fill="#b8960c" opacity="0.3"/>
-      <!-- Right pillar -->
-      <rect x="140" y="80" width="32" height="106" rx="2" fill="#2c4a6e" opacity="0.1" stroke="#2c4a6e" stroke-width="1"/>
-      <rect x="136" y="76" width="40" height="8" rx="1" fill="#2c4a6e" opacity="0.18" stroke="#2c4a6e" stroke-width="0.8"/>
-      <rect x="134" y="68" width="44" height="10" rx="1" fill="#2c4a6e" opacity="0.14" stroke="#2c4a6e" stroke-width="0.8"/>
-      <rect x="164" y="90" width="4" height="80" rx="1" fill="#b8960c" opacity="0.2"/>
-      <rect x="136" y="72" width="14" height="2" fill="#b8960c" opacity="0.3"/>
-      <rect x="150" y="72" width="14" height="2" fill="#b8960c" opacity="0.3"/>
-      <!-- Arch connecting pillars -->
-      <path d="M60 80 Q100 35 140 80" stroke="#2c4a6e" stroke-width="2.5" fill="none"/>
-      <path d="M64 82 Q100 42 136 82" stroke="#2c4a6e" stroke-width="1" fill="none" opacity="0.4"/>
-      <!-- Arch fill -->
-      <path d="M60 80 Q100 35 140 80 L140 90 Q100 50 60 90 Z" fill="#2c4a6e" opacity="0.06"/>
-      <!-- School seal in arch -->
-      <circle cx="100" cy="68" r="16" stroke="#b8960c" stroke-width="1.2" fill="#b8960c" opacity="0.06"/>
-      <circle cx="100" cy="68" r="11" stroke="#b8960c" stroke-width="0.8" fill="none"/>
-      <circle cx="100" cy="68" r="5" fill="#b8960c" opacity="0.25"/>
-      <!-- Star points on seal -->
-      <path d="M100 57 L102 64 L100 63 L98 64 Z" fill="#b8960c" opacity="0.4"/>
-      <path d="M100 79 L102 72 L100 73 L98 72 Z" fill="#b8960c" opacity="0.4"/>
-      <path d="M89 68 L96 66 L95 68 L96 70 Z" fill="#b8960c" opacity="0.4"/>
-      <path d="M111 68 L104 66 L105 68 L104 70 Z" fill="#b8960c" opacity="0.4"/>
-      <!-- Gate doors (open) -->
-      <rect x="72" y="120" width="24" height="66" rx="1" fill="#2c4a6e" opacity="0.08" stroke="#2c4a6e" stroke-width="1"/>
-      <rect x="104" y="120" width="24" height="66" rx="1" fill="#2c4a6e" opacity="0.08" stroke="#2c4a6e" stroke-width="1"/>
-      <!-- Door details -->
-      <rect x="76" y="126" width="8" height="10" rx="0.5" stroke="#b8960c" stroke-width="0.6" fill="none" opacity="0.5"/>
-      <rect x="76" y="142" width="8" height="10" rx="0.5" stroke="#b8960c" stroke-width="0.6" fill="none" opacity="0.5"/>
-      <rect x="108" y="126" width="8" height="10" rx="0.5" stroke="#b8960c" stroke-width="0.6" fill="none" opacity="0.5"/>
-      <rect x="108" y="142" width="8" height="10" rx="0.5" stroke="#b8960c" stroke-width="0.6" fill="none" opacity="0.5"/>
-      <!-- Door handles -->
-      <circle cx="94" cy="153" r="2" fill="#b8960c" opacity="0.4"/>
-      <circle cx="106" cy="153" r="2" fill="#b8960c" opacity="0.4"/>
-      <!-- Top lanterns -->
-      <rect x="36" y="58" width="16" height="12" rx="2" fill="#b8960c" opacity="0.2" stroke="#b8960c" stroke-width="0.8"/>
-      <line x1="44" y1="56" x2="44" y2="53" stroke="#b8960c" stroke-width="1" opacity="0.5"/>
-      <circle cx="44" cy="52" r="2" fill="#b8960c" opacity="0.35"/>
-      <rect x="148" y="58" width="16" height="12" rx="2" fill="#b8960c" opacity="0.2" stroke="#b8960c" stroke-width="0.8"/>
-      <line x1="156" y1="56" x2="156" y2="53" stroke="#b8960c" stroke-width="1" opacity="0.5"/>
-      <circle cx="156" cy="52" r="2" fill="#b8960c" opacity="0.35"/>
-      <!-- Path to gate -->
-      <path d="M80 200 L80 186 M120 200 L120 186" stroke="#2c4a6e" stroke-width="0.5" opacity="0.3"/>
-      <!-- Ground steps -->
-      <rect x="60" y="194" width="80" height="4" rx="0.5" fill="#2c4a6e" opacity="0.08" stroke="#2c4a6e" stroke-width="0.5"/>
-      <rect x="50" y="198" width="100" height="4" rx="0.5" fill="#2c4a6e" opacity="0.06" stroke="#2c4a6e" stroke-width="0.5"/>
-      <!-- Stars above -->
-      <path d="M100 8 L102 14 L108 14 L103 18 L105 24 L100 20 L95 24 L97 18 L92 14 L98 14 Z" fill="#b8960c" opacity="0.35"/>
-      <path d="M78 16 L79.5 20.5 L84 20.5 L80.5 23.5 L82 28 L78 25 L74 28 L75.5 23.5 L72 20.5 L76.5 20.5 Z" fill="#b8960c" opacity="0.2"/>
-      <path d="M122 16 L123.5 20.5 L128 20.5 L124.5 23.5 L126 28 L122 25 L118 28 L119.5 23.5 L116 20.5 L120.5 20.5 Z" fill="#b8960c" opacity="0.2"/>
-    </svg>`,
+// 雷达图：单色多边形填充，每段轮廓线+标签按分数段着色
+// ≥70蓝色，40-69金色，<40红色
+function radarChart(ds){
+  const dims=[
+    {key:'academic',   label:'学业背景', en:'Academic'},
+    {key:'english',    label:'英语能力', en:'English'},
+    {key:'research',   label:'科研经历', en:'Research'},
+    {key:'competition',label:'竞赛荣誉', en:'Competition'},
+    {key:'softskill',  label:'软实力',   en:'Soft Skills'},
+  ];
+  function segCol(s){
+    if(s>=70)return{stroke:'#1a56c4',label:'#0f3d8a',dot:'#1a56c4',glow:'rgba(26,86,196,0.14)'};
+    if(s>=40)return{stroke:'#c08000',label:'#92600a',dot:'#d4a017',glow:'rgba(212,160,23,0.14)'};
+    return{stroke:'#9b2020',label:'#7a1818',dot:'#b02020',glow:'rgba(155,32,32,0.13)'};
+  }
+  const N=5,cx=200,cy=200,R=122;
+  const step=(Math.PI*2)/N,start=-Math.PI/2;
+  const uid='r'+Math.random().toString(36).slice(2,7);
+  function pt(r,i){const a=start+i*step;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
 
-    tier2: `<svg width="200" height="220" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Tier 2: 华五级 — Western-influenced Chinese University Main Hall -->
-      <!-- Ground -->
-      <rect x="10" y="196" width="180" height="12" rx="1" fill="#4a6a2e" opacity="0.1" stroke="#4a6a2e" stroke-width="0.6"/>
-      <!-- Steps -->
-      <rect x="30" y="190" width="140" height="6" rx="0.5" fill="#4a6a2e" opacity="0.08" stroke="#4a6a2e" stroke-width="0.6"/>
-      <rect x="40" y="184" width="120" height="6" rx="0.5" fill="#4a6a2e" opacity="0.08" stroke="#4a6a2e" stroke-width="0.6"/>
-      <!-- Main building body -->
-      <rect x="30" y="100" width="140" height="84" rx="2" fill="#4a6a2e" opacity="0.08" stroke="#4a6a2e" stroke-width="1.2"/>
-      <!-- Pediment / triangular roof -->
-      <path d="M25 100 L100 50 L175 100 Z" fill="#4a6a2e" opacity="0.07" stroke="#4a6a2e" stroke-width="1.2"/>
-      <path d="M35 100 L100 58 L165 100" stroke="#4a6a2e" stroke-width="0.5" fill="none" opacity="0.3"/>
-      <!-- Pediment decoration: school seal -->
-      <circle cx="100" cy="76" r="14" stroke="#b8960c" stroke-width="1" fill="#b8960c" opacity="0.06"/>
-      <circle cx="100" cy="76" r="9" stroke="#b8960c" stroke-width="0.7" fill="none"/>
-      <path d="M100 67 L101.5 72 L100 71.5 L98.5 72 Z M100 85 L101.5 80 L100 80.5 L98.5 80 Z M91 76 L96 74.5 L95.5 76 L96 77.5 Z M109 76 L104 74.5 L104.5 76 L104 77.5 Z" fill="#b8960c" opacity="0.45"/>
-      <!-- Columns -->
-      <rect x="40" y="100" width="10" height="84" rx="2" fill="#4a6a2e" opacity="0.15" stroke="#4a6a2e" stroke-width="0.8"/>
-      <rect x="58" y="100" width="10" height="84" rx="2" fill="#4a6a2e" opacity="0.15" stroke="#4a6a2e" stroke-width="0.8"/>
-      <rect x="76" y="100" width="10" height="84" rx="2" fill="#4a6a2e" opacity="0.15" stroke="#4a6a2e" stroke-width="0.8"/>
-      <rect x="114" y="100" width="10" height="84" rx="2" fill="#4a6a2e" opacity="0.15" stroke="#4a6a2e" stroke-width="0.8"/>
-      <rect x="132" y="100" width="10" height="84" rx="2" fill="#4a6a2e" opacity="0.15" stroke="#4a6a2e" stroke-width="0.8"/>
-      <rect x="150" y="100" width="10" height="84" rx="2" fill="#4a6a2e" opacity="0.15" stroke="#4a6a2e" stroke-width="0.8"/>
-      <!-- Column capitals -->
-      <rect x="38" y="96" width="14" height="5" rx="0.5" fill="#b8960c" opacity="0.2"/>
-      <rect x="56" y="96" width="14" height="5" rx="0.5" fill="#b8960c" opacity="0.2"/>
-      <rect x="74" y="96" width="14" height="5" rx="0.5" fill="#b8960c" opacity="0.2"/>
-      <rect x="112" y="96" width="14" height="5" rx="0.5" fill="#b8960c" opacity="0.2"/>
-      <rect x="130" y="96" width="14" height="5" rx="0.5" fill="#b8960c" opacity="0.2"/>
-      <rect x="148" y="96" width="14" height="5" rx="0.5" fill="#b8960c" opacity="0.2"/>
-      <!-- Central door -->
-      <rect x="87" y="142" width="26" height="42" rx="2" fill="#4a6a2e" opacity="0.1" stroke="#4a6a2e" stroke-width="1"/>
-      <path d="M87 148 Q100 140 113 148" stroke="#4a6a2e" stroke-width="0.8" fill="none"/>
-      <!-- Windows -->
-      <rect x="42" y="110" width="22" height="16" rx="1" fill="#4a6a2e" opacity="0.08" stroke="#4a6a2e" stroke-width="0.8"/>
-      <rect x="71" y="110" width="22" height="16" rx="1" fill="#4a6a2e" opacity="0.08" stroke="#4a6a2e" stroke-width="0.8"/>
-      <rect x="107" y="110" width="22" height="16" rx="1" fill="#4a6a2e" opacity="0.08" stroke="#4a6a2e" stroke-width="0.8"/>
-      <rect x="136" y="110" width="22" height="16" rx="1" fill="#4a6a2e" opacity="0.08" stroke="#4a6a2e" stroke-width="0.8"/>
-      <!-- Clock tower -->
-      <rect x="88" y="30" width="24" height="50" rx="1" fill="#4a6a2e" opacity="0.1" stroke="#4a6a2e" stroke-width="1"/>
-      <rect x="86" y="28" width="28" height="6" rx="0.5" fill="#4a6a2e" opacity="0.14" stroke="#4a6a2e" stroke-width="0.8"/>
-      <!-- Clock face -->
-      <circle cx="100" cy="44" r="9" stroke="#b8960c" stroke-width="1" fill="none"/>
-      <line x1="100" y1="44" x2="100" y2="37" stroke="#b8960c" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-      <line x1="100" y1="44" x2="106" y2="47" stroke="#b8960c" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
-      <!-- Tower top -->
-      <path d="M86 28 L100 14 L114 28 Z" fill="#4a6a2e" opacity="0.12" stroke="#4a6a2e" stroke-width="1"/>
-      <circle cx="100" cy="10" r="3" fill="#b8960c" opacity="0.4"/>
-      <line x1="100" y1="7" x2="100" y2="3" stroke="#b8960c" stroke-width="1" opacity="0.5"/>
-    </svg>`,
+  // 网格
+  const rings=[.2,.4,.6,.8,1].map((l,li)=>{
+    const pts=dims.map((_,i)=>pt(R*l,i));
+    const d=pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')+'Z';
+    return`<path d="${d}" fill="${li===4?'rgba(215,225,250,0.4)':'none'}" stroke="rgba(100,120,180,${li===4?'0.26':'0.13'})" stroke-width="${li===4?1:.5}" stroke-dasharray="${li<4?'3,3':''}"/>`;
+  }).join('');
 
-    tier3: `<svg width="200" height="220" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Tier 3: 强985级 — Traditional Chinese Campus Library/Pavilion Building -->
-      <!-- Foundation -->
-      <rect x="15" y="192" width="170" height="14" rx="1" fill="#6a2c4a" opacity="0.1" stroke="#6a2c4a" stroke-width="0.7"/>
-      <rect x="25" y="186" width="150" height="6" rx="0.5" fill="#6a2c4a" opacity="0.07" stroke="#6a2c4a" stroke-width="0.5"/>
-      <!-- Main building -->
-      <rect x="28" y="108" width="144" height="78" rx="2" fill="#6a2c4a" opacity="0.07" stroke="#6a2c4a" stroke-width="1"/>
-      <!-- Multi-tier Chinese eaves roof -->
-      <!-- Top roof tier -->
-      <path d="M60 62 Q100 38 140 62 L148 72 L52 72 Z" fill="#6a2c4a" opacity="0.12" stroke="#6a2c4a" stroke-width="1"/>
-      <!-- Roof ridge ornaments -->
-      <path d="M52 72 L45 68" stroke="#b8960c" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-      <path d="M148 72 L155 68" stroke="#b8960c" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-      <path d="M60 62 L55 56" stroke="#b8960c" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-      <path d="M140 62 L145 56" stroke="#b8960c" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-      <!-- Middle roof tier -->
-      <path d="M38 82 Q100 60 162 82 L168 92 L32 92 Z" fill="#6a2c4a" opacity="0.1" stroke="#6a2c4a" stroke-width="1"/>
-      <path d="M32 92 L24 87" stroke="#b8960c" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-      <path d="M168 92 L176 87" stroke="#b8960c" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-      <!-- Lower roof tier / eave -->
-      <path d="M28 100 Q100 82 172 100 L176 108 L24 108 Z" fill="#6a2c4a" opacity="0.08" stroke="#6a2c4a" stroke-width="1"/>
-      <!-- Roof ridge peak -->
-      <path d="M85 62 L100 42 L115 62" stroke="#6a2c4a" stroke-width="1" fill="none" opacity="0.5"/>
-      <circle cx="100" cy="40" r="4" fill="#b8960c" opacity="0.3" stroke="#b8960c" stroke-width="0.8"/>
-      <line x1="100" y1="36" x2="100" y2="30" stroke="#b8960c" stroke-width="1" opacity="0.4"/>
-      <!-- Facade columns -->
-      <rect x="36" y="108" width="9" height="78" rx="1.5" fill="#6a2c4a" opacity="0.13" stroke="#6a2c4a" stroke-width="0.7"/>
-      <rect x="54" y="108" width="9" height="78" rx="1.5" fill="#6a2c4a" opacity="0.13" stroke="#6a2c4a" stroke-width="0.7"/>
-      <rect x="137" y="108" width="9" height="78" rx="1.5" fill="#6a2c4a" opacity="0.13" stroke="#6a2c4a" stroke-width="0.7"/>
-      <rect x="155" y="108" width="9" height="78" rx="1.5" fill="#6a2c4a" opacity="0.13" stroke="#6a2c4a" stroke-width="0.7"/>
-      <!-- Central arched windows -->
-      <rect x="68" y="118" width="28" height="22" rx="14 14 0 0" fill="#6a2c4a" opacity="0.06" stroke="#6a2c4a" stroke-width="0.8"/>
-      <rect x="104" y="118" width="28" height="22" rx="14 14 0 0" fill="#6a2c4a" opacity="0.06" stroke="#6a2c4a" stroke-width="0.8"/>
-      <!-- Central door -->
-      <rect x="82" y="148" width="36" height="38" rx="2" fill="#6a2c4a" opacity="0.08" stroke="#6a2c4a" stroke-width="1"/>
-      <path d="M82 154 Q100 146 118 154" stroke="#6a2c4a" stroke-width="0.8" fill="none"/>
-      <!-- Door handle -->
-      <circle cx="96" cy="166" r="2" fill="#b8960c" opacity="0.4"/>
-      <circle cx="104" cy="166" r="2" fill="#b8960c" opacity="0.4"/>
-      <!-- Decorative panels -->
-      <rect x="70" y="124" width="10" height="8" rx="0.5" stroke="#b8960c" stroke-width="0.5" fill="none" opacity="0.4"/>
-      <rect x="120" y="124" width="10" height="8" rx="0.5" stroke="#b8960c" stroke-width="0.5" fill="none" opacity="0.4"/>
-    </svg>`,
+  // 轴线（浅灰，不干扰）
+  const axes=dims.map((_,i)=>{
+    const[x,y]=pt(R,i);
+    return`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(100,120,180,0.16)" stroke-width="1"/>`;
+  }).join('');
 
-    tier4: `<svg width="200" height="220" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Tier 4: 211级 — Modern Academic Building with Clean Architecture -->
-      <!-- Ground shadow -->
-      <ellipse cx="100" cy="208" rx="80" ry="6" fill="#7a4a1c" opacity="0.08"/>
-      <!-- Foundation -->
-      <rect x="20" y="190" width="160" height="16" rx="1" fill="#7a4a1c" opacity="0.1" stroke="#7a4a1c" stroke-width="0.7"/>
-      <!-- Main building body -->
-      <rect x="30" y="60" width="140" height="130" rx="3" fill="#7a4a1c" opacity="0.07" stroke="#7a4a1c" stroke-width="1.2"/>
-      <!-- Flat roof line -->
-      <rect x="28" y="55" width="144" height="8" rx="1" fill="#7a4a1c" opacity="0.12" stroke="#7a4a1c" stroke-width="0.8"/>
-      <!-- Roof accent line -->
-      <rect x="26" y="52" width="148" height="4" rx="0.5" fill="#b8960c" opacity="0.2" stroke="#b8960c" stroke-width="0.5"/>
-      <!-- Top of building: parapet details -->
-      <rect x="30" y="48" width="24" height="8" rx="0.5" fill="#7a4a1c" opacity="0.1"/>
-      <rect x="62" y="48" width="24" height="8" rx="0.5" fill="#7a4a1c" opacity="0.1"/>
-      <rect x="94" y="48" width="24" height="8" rx="0.5" fill="#7a4a1c" opacity="0.1"/>
-      <rect x="114" y="44" width="30" height="12" rx="0.5" fill="#7a4a1c" opacity="0.12"/>
-      <!-- Flag pole -->
-      <line x1="100" y1="48" x2="100" y2="20" stroke="#7a4a1c" stroke-width="1.5" opacity="0.35"/>
-      <path d="M100 20 L118 26 L100 32 Z" fill="#b8960c" opacity="0.3" stroke="#b8960c" stroke-width="0.8"/>
-      <!-- Window grid — modern style -->
-      <!-- Row 1 -->
-      <rect x="38" y="70" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="62" y="70" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="86" y="70" width="28" height="14" rx="1" fill="#7a4a1c" opacity="0.1" stroke="#7a4a1c" stroke-width="0.8"/>
-      <rect x="120" y="70" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="144" y="70" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <!-- Row 2 -->
-      <rect x="38" y="92" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="62" y="92" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="86" y="92" width="28" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="120" y="92" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="144" y="92" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <!-- Row 3 -->
-      <rect x="38" y="114" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="62" y="114" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="86" y="114" width="28" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="120" y="114" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <rect x="144" y="114" width="18" height="14" rx="1" fill="#7a4a1c" opacity="0.06" stroke="#7a4a1c" stroke-width="0.7"/>
-      <!-- Vertical accent strip -->
-      <rect x="82" y="60" width="4" height="130" fill="#b8960c" opacity="0.08"/>
-      <rect x="114" y="60" width="4" height="130" fill="#b8960c" opacity="0.08"/>
-      <!-- Central entrance canopy -->
-      <path d="M78 142 L122 142 L122 146 L78 146 Z" fill="#b8960c" opacity="0.15" stroke="#b8960c" stroke-width="0.8"/>
-      <!-- Main entrance -->
-      <rect x="84" y="146" width="32" height="44" rx="1" fill="#7a4a1c" opacity="0.08" stroke="#7a4a1c" stroke-width="1"/>
-      <!-- Door details -->
-      <line x1="100" y1="146" x2="100" y2="190" stroke="#7a4a1c" stroke-width="0.7" opacity="0.3"/>
-      <circle cx="95" cy="168" r="2" fill="#b8960c" opacity="0.35"/>
-      <circle cx="105" cy="168" r="2" fill="#b8960c" opacity="0.35"/>
-    </svg>`,
+  // 刻度
+  const ticks=[.2,.4,.6,.8,1].map((l,li)=>{
+    const[x,y]=pt(R*l,0);
+    return`<text x="${(x+4).toFixed(1)}" y="${(y+4).toFixed(1)}" font-family="IBM Plex Mono,monospace" font-size="8" fill="rgba(80,100,160,0.32)">${[20,40,60,80,100][li]}</text>`;
+  }).join('');
 
-    tier5: `<svg width="200" height="220" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Tier 5: 双非冲211 — Open Book with Rising Path -->
-      <!-- Open book base -->
-      <path d="M20 160 Q100 145 180 160 L180 175 Q100 165 20 175 Z" fill="#2a5a5a" opacity="0.08" stroke="#2a5a5a" stroke-width="1"/>
-      <!-- Book left page -->
-      <path d="M20 90 Q60 80 100 88 L100 160 Q60 155 20 165 Z" fill="#2a5a5a" opacity="0.07" stroke="#2a5a5a" stroke-width="1"/>
-      <!-- Book right page -->
-      <path d="M100 88 Q140 80 180 90 L180 165 Q140 155 100 160 Z" fill="#2a5a5a" opacity="0.07" stroke="#2a5a5a" stroke-width="1"/>
-      <!-- Book spine -->
-      <line x1="100" y1="88" x2="100" y2="160" stroke="#2a5a5a" stroke-width="2" opacity="0.25"/>
-      <!-- Lines on left page -->
-      <line x1="30" y1="100" x2="92" y2="97" stroke="#2a5a5a" stroke-width="0.7" opacity="0.3"/>
-      <line x1="30" y1="108" x2="92" y2="105" stroke="#2a5a5a" stroke-width="0.7" opacity="0.3"/>
-      <line x1="30" y1="116" x2="92" y2="113" stroke="#2a5a5a" stroke-width="0.7" opacity="0.3"/>
-      <line x1="30" y1="124" x2="92" y2="121" stroke="#2a5a5a" stroke-width="0.7" opacity="0.25"/>
-      <line x1="30" y1="132" x2="92" y2="129" stroke="#2a5a5a" stroke-width="0.7" opacity="0.2"/>
-      <line x1="30" y1="140" x2="92" y2="137" stroke="#2a5a5a" stroke-width="0.7" opacity="0.15"/>
-      <!-- Lines on right page -->
-      <line x1="108" y1="97" x2="170" y2="100" stroke="#2a5a5a" stroke-width="0.7" opacity="0.3"/>
-      <line x1="108" y1="105" x2="170" y2="108" stroke="#2a5a5a" stroke-width="0.7" opacity="0.3"/>
-      <line x1="108" y1="113" x2="170" y2="116" stroke="#2a5a5a" stroke-width="0.7" opacity="0.3"/>
-      <line x1="108" y1="121" x2="170" y2="124" stroke="#2a5a5a" stroke-width="0.7" opacity="0.25"/>
-      <line x1="108" y1="129" x2="170" y2="132" stroke="#2a5a5a" stroke-width="0.7" opacity="0.2"/>
-      <!-- Rising arrow/path from book -->
-      <path d="M60 88 Q80 60 100 40 Q120 60 140 88" stroke="#b8960c" stroke-width="1.5" fill="none" opacity="0.5" stroke-dasharray="3 3"/>
-      <!-- Upward arrow -->
-      <path d="M92 46 L100 30 L108 46" stroke="#b8960c" stroke-width="2" fill="none" opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
-      <line x1="100" y1="30" x2="100" y2="88" stroke="#b8960c" stroke-width="1.5" opacity="0.5"/>
-      <!-- Stars along the path -->
-      <path d="M60 72 L61.5 76.5 L66 76.5 L62.5 79.5 L64 84 L60 81 L56 84 L57.5 79.5 L54 76.5 L58.5 76.5 Z" fill="#b8960c" opacity="0.3"/>
-      <path d="M140 72 L141.5 76.5 L146 76.5 L142.5 79.5 L144 84 L140 81 L136 84 L137.5 79.5 L134 76.5 L138.5 76.5 Z" fill="#b8960c" opacity="0.3"/>
-      <path d="M100 20 L101.5 24.5 L106 24.5 L102.5 27.5 L104 32 L100 29 L96 32 L97.5 27.5 L94 24.5 L98.5 24.5 Z" fill="#b8960c" opacity="0.45"/>
-      <!-- School building silhouette in background -->
-      <rect x="70" y="175" width="60" height="25" rx="1" fill="#2a5a5a" opacity="0.06" stroke="#2a5a5a" stroke-width="0.5"/>
-      <rect x="88" y="167" width="24" height="10" rx="0.5" fill="#2a5a5a" opacity="0.06" stroke="#2a5a5a" stroke-width="0.5"/>
-    </svg>`,
+  // 数据顶点
+  const dataPoints=dims.map((d,i)=>pt(R*Math.max(0.04,(ds[d.key]||0)/100),i));
+  const dataPath=dataPoints.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')+'Z';
 
-    tier6: `<svg width="200" height="220" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Tier 6: 全力蓄势 — Dawn breaking over a Mountain Path -->
-      <!-- Sky gradient suggestion -->
-      <circle cx="100" cy="85" r="55" fill="#b8960c" opacity="0.06"/>
-      <!-- Sun rising -->
-      <circle cx="100" cy="88" r="26" fill="#b8960c" opacity="0.12" stroke="#b8960c" stroke-width="1"/>
-      <circle cx="100" cy="88" r="18" fill="#b8960c" opacity="0.18" stroke="#b8960c" stroke-width="1.2"/>
-      <circle cx="100" cy="88" r="10" fill="#b8960c" opacity="0.30"/>
-      <!-- Sun rays -->
-      <line x1="100" y1="54" x2="100" y2="44" stroke="#b8960c" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
-      <line x1="122" y1="60" x2="129" y2="52" stroke="#b8960c" stroke-width="1.5" opacity="0.45" stroke-linecap="round"/>
-      <line x1="134" y1="80" x2="144" y2="76" stroke="#b8960c" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
-      <line x1="78" y1="60" x2="71" y2="52" stroke="#b8960c" stroke-width="1.5" opacity="0.45" stroke-linecap="round"/>
-      <line x1="66" y1="80" x2="56" y2="76" stroke="#b8960c" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
-      <line x1="134" y1="100" x2="144" y2="102" stroke="#b8960c" stroke-width="1.2" opacity="0.3" stroke-linecap="round"/>
-      <line x1="66" y1="100" x2="56" y2="102" stroke="#b8960c" stroke-width="1.2" opacity="0.3" stroke-linecap="round"/>
-      <!-- Horizon line -->
-      <line x1="15" y1="118" x2="185" y2="118" stroke="#2a5a5a" stroke-width="1" opacity="0.3"/>
-      <!-- Mountain silhouette -->
-      <path d="M15 118 Q50 95 100 110 Q150 95 185 118" fill="#2a5a5a" opacity="0.08" stroke="#2a5a5a" stroke-width="1"/>
-      <!-- Path winding upward -->
-      <path d="M60 180 Q80 160 90 140 Q98 125 100 110" stroke="#b8960c" stroke-width="1.5" fill="none" opacity="0.4" stroke-dasharray="4 3"/>
-      <path d="M140 180 Q120 160 110 140 Q102 125 100 110" stroke="#b8960c" stroke-width="1.5" fill="none" opacity="0.4" stroke-dasharray="4 3"/>
-      <!-- Walking figure silhouette on path -->
-      <circle cx="74" cy="162" r="4" fill="#2a5a5a" opacity="0.25"/>
-      <line x1="74" y1="166" x2="74" y2="178" stroke="#2a5a5a" stroke-width="2" opacity="0.25" stroke-linecap="round"/>
-      <path d="M70 172 L74 168 L78 172" stroke="#2a5a5a" stroke-width="1.5" fill="none" opacity="0.25" stroke-linecap="round"/>
-      <!-- Ground -->
-      <rect x="10" y="186" width="180" height="14" rx="1" fill="#2a5a5a" opacity="0.08"/>
-      <!-- Inspirational inscription line -->
-      <line x1="50" y1="200" x2="150" y2="200" stroke="#b8960c" stroke-width="0.8" opacity="0.3"/>
-    </svg>`,
-  };
-  return svgs[tierId] || svgs['tier6'];
+  // 整体填充色系由综合分决定
+  const avg=Math.round(DORDER.reduce((a,d)=>a+(ds[d]||0)*DIMS[d].w,0));
+  const mainRGB=avg>=70?'26,86,196':avg>=40?'180,130,10':'155,32,32';
+  const gid='fg_'+uid;
+
+  // 每段轮廓线单独按起点维度分数着色，分数越高越粗
+  const outline=dims.map((dim,i)=>{
+    const s=ds[dim.key]||0;
+    const col=segCol(s);
+    const w=(1.5+s/100*2).toFixed(1);
+    const p1=dataPoints[i],p2=dataPoints[(i+1)%N];
+    return`<line x1="${p1[0].toFixed(1)}" y1="${p1[1].toFixed(1)}" x2="${p2[0].toFixed(1)}" y2="${p2[1].toFixed(1)}" stroke="${col.stroke}" stroke-width="${w}" stroke-linecap="round"/>`;
+  }).join('');
+
+  // 顶点光晕+实心点
+  const dots=dataPoints.map((p,i)=>{
+    const s=ds[dims[i].key]||0,col=segCol(s);
+    return`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="12" fill="${col.glow}"/>
+<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="5" fill="${col.dot}" opacity=".9"/>
+<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2" fill="white"/>`;
+  }).join('');
+
+  // 标签：颜色跟分数走，位置精确控制
+  const labels=dims.map((dim,i)=>{
+    const angle=start+i*step;
+    const lx=cx+(R+42)*Math.cos(angle);
+    const ly=cy+(R+42)*Math.sin(angle);
+    const s=ds[dim.key]||0,col=segCol(s);
+    const anchor=lx<cx-10?'end':lx>cx+10?'start':'middle';
+    // 顶部（学业）往上偏，底部往下偏，避免与点重叠
+    const baseY=ly<=cy?ly-8:ly+2;
+    return`<text x="${lx.toFixed(1)}" y="${baseY.toFixed(1)}" text-anchor="${anchor}" font-family="Noto Serif SC,serif" font-size="12" font-weight="700" fill="${col.label}">${dim.label}</text>
+<text x="${lx.toFixed(1)}" y="${(baseY+16).toFixed(1)}" text-anchor="${anchor}" font-family="IBM Plex Mono,monospace" font-size="9" fill="rgba(80,100,150,0.55)">${dim.en} · ${s}</text>`;
+  }).join('');
+
+  return`<svg width="100%" height="auto" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="${gid}" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="rgba(${mainRGB},0.05)"/>
+    <stop offset="100%" stop-color="rgba(${mainRGB},0.22)"/>
+  </radialGradient></defs>
+  ${rings}${axes}${ticks}
+  <path d="${dataPath}" fill="url(#${gid})"/>
+  ${outline}${dots}${labels}
+  <circle cx="${cx}" cy="${cy}" r="19" fill="white" stroke="rgba(100,120,200,0.16)" stroke-width="1"/>
+  <text x="${cx}" y="${cy+5}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" font-weight="500" fill="#1c2e4a">${avg}</text>
+</svg>`;
 }
 
-// ============================================================
+// 进度条初始化：通过JS测量qh-logo和qh-count的实际宽度来同步spacer
+function initProgressSegs(){
+  // 重置所有段背景
+  DORDER.forEach(d=>{
+    const seg=document.getElementById('pseg-'+d);
+    if(seg)seg.style.background='rgba(255,255,255,.06)';
+  });
+  // 同步spacer宽度（在quiz屏幕显示后测量）
+  requestAnimationFrame(()=>{
+    const logo=document.getElementById('qh-logo');
+    const count=document.getElementById('qh-count');
+    const logoSpace=document.getElementById('pw-logo-space');
+    const countSpace=document.getElementById('pw-count-space');
+    if(logo&&logoSpace) logoSpace.style.width=logo.offsetWidth+'px';
+    if(count&&countSpace) countSpace.style.width=count.offsetWidth+'px';
+  });
+}
+
+function updateProgressBars(curIdx){
+  DORDER.forEach(d=>{
+    const seg=document.getElementById('pseg-'+d);
+    if(!seg)return;
+    const qs=Q.map((q,j)=>q.d===d?j:-1).filter(j=>j>=0);
+    const done=qs.filter(j=>ans[j]!==undefined).length;
+    const pct=(done/qs.length*100).toFixed(2);
+    const isActive=curIdx>=0&&Q[curIdx]&&Q[curIdx].d===d;
+    const bc=BASE_COLORS[d];
+    seg.style.background=`linear-gradient(90deg,rgba(${bc},0.88) ${pct}%,rgba(255,255,255,${isActive?'0.14':'0.06'}) ${pct}%)`;
+  });
+}
+
 // APP STATE
-// ============================================================
-let answers = {};
-let currentIndex = 0;
-let isNavigating = false;
-let pendingReturnToLast = false;
+let ans={},cur=0,busy=false,returnMode=false;
+const TOTAL=Q.length;
 
-function startTest() {
-  answers = {};
-  currentIndex = 0;
-  isNavigating = false;
-  pendingReturnToLast = false;
-  showScreen('quiz-screen');
-  renderQuestion(0);
+function startTest(){
+  ans={};cur=0;busy=false;returnMode=false;
+  showScreen('quiz');
+  initProgressSegs();
+  renderQ(0);
 }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => {
-    s.classList.add('hidden'); s.classList.remove('active');
-  });
-  const el = document.getElementById(id);
-  el.classList.remove('hidden');
-  setTimeout(() => el.classList.add('active'), 20);
-  window.scrollTo({ top:0, behavior:'smooth' });
-}
-
-function renderQuestion(index, direction='none') {
-  const card = document.getElementById('question-card');
-  const q = QUESTIONS[index];
-  const total = QUESTIONS.length;
-
-  document.getElementById('current-q').textContent = index + 1;
-  document.getElementById('progress-fill').style.width = ((index + 1) / total * 100) + '%';
-  document.getElementById('dim-indicator').textContent = DIM_INDICATORS[q.dim];
-
-  const doFill = () => { fillCard(q, index); updateNavButtons(); isNavigating = false; };
-
-  if (direction === 'forward') {
-    card.classList.add('slide-out-left');
-    setTimeout(() => { card.classList.remove('slide-out-left'); doFill(); card.classList.add('slide-in-right'); setTimeout(() => card.classList.remove('slide-in-right'), 280); }, 280);
-  } else if (direction === 'back') {
-    card.classList.add('slide-out-right');
-    setTimeout(() => { card.classList.remove('slide-out-right'); doFill(); card.classList.add('slide-in-left'); setTimeout(() => card.classList.remove('slide-in-left'), 280); }, 280);
-  } else {
-    doFill();
-  }
-}
-
-function fillCard(q, index) {
-  document.getElementById('q-number').innerHTML = `QUESTION ${String(index+1).padStart(2,'0')} <span class="q-dim-tag">${q.dimLabel}</span>`;
-  document.getElementById('q-text').textContent = q.text;
-  const saved = answers[index];
-  const labels = ['完全不符','基本不符','部分符合','比较符合','完全符合'];
-  document.getElementById('likert-container').innerHTML = `
-    <div class="likert-container">
-      <div class="likert-strip">
-        ${[1,2,3,4,5].map(v => `
-          <button class="likert-cell ${saved===v ? 'sel-'+v : ''}" onclick="selectAnswer(${index},${v})">
-            <div class="likert-dot"></div>
-            <div class="likert-cell-label">${labels[v-1]}</div>
-          </button>`).join('')}
-      </div>
-      <div class="likert-endpoints">
-        <span class="likert-ep">← 完全不符</span>
-        <span class="likert-ep">完全符合 →</span>
-      </div>
-    </div>`;
-}
-
-function selectAnswer(index, value) {
-  answers[index] = value;
-  document.querySelectorAll('.likert-cell').forEach((cell,i) => {
-    const v = i+1;
-    cell.className = 'likert-cell' + (v===value ? ' sel-'+v : '');
-  });
-  updateNavButtons();
-  if (!isNavigating) {
-    isNavigating = true;
-    setTimeout(() => {
-      if (pendingReturnToLast) {
-        pendingReturnToLast = false;
-        const remaining = [];
-        for (let i = 0; i < QUESTIONS.length; i++) { if (answers[i]===undefined && i!==index) remaining.push(i); }
-        if (remaining.length > 0) { isNavigating = false; showUnansweredAfterLast(remaining); return; }
-        else { currentIndex = QUESTIONS.length-1; renderQuestion(currentIndex,'forward'); window.scrollTo({top:0,behavior:'smooth'}); isNavigating=false; return; }
-      }
-      const unanswered = [];
-      for (let i = 0; i < QUESTIONS.length; i++) { if (answers[i]===undefined && i!==index) unanswered.push(i); }
-      const isLast = index === QUESTIONS.length-1;
-      if (!isLast) { currentIndex = index+1; renderQuestion(currentIndex,'forward'); window.scrollTo({top:0,behavior:'smooth'}); }
-      else if (unanswered.length > 0) { showUnansweredAfterLast(unanswered); isNavigating=false; }
-      else { isNavigating=false; }
-    }, 480);
-  }
-}
-
-function navigate(dir) {
-  if (isNavigating) return;
-  const newIndex = currentIndex + dir;
-  if (newIndex < 0 || newIndex >= QUESTIONS.length) return;
-  isNavigating = true;
-  currentIndex = newIndex;
-  renderQuestion(currentIndex, dir===1?'forward':'back');
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function updateNavButtons() {
-  document.getElementById('btn-prev').disabled = currentIndex === 0;
-  const isLast = currentIndex === QUESTIONS.length-1;
-  const sb = document.getElementById('btn-submit');
-  sb.classList.toggle('visible', isLast);
-}
+function renderQ(i){
+  const q=Q[i];
+  document.getElementById('qcur').textContent=i+1;
+  updateProgressBars(i);
 
-function closeModal() { document.getElementById('unanswered-modal').classList.remove('open'); }
+  const dimProgress={};
+  DORDER.forEach(d=>{
+    const qs=Q.map((qq,j)=>qq.d===d?j:-1).filter(j=>j>=0);
+    dimProgress[d]={total:qs.length,done:qs.filter(j=>ans[j]!==undefined).length};
+  });
+  document.querySelectorAll('.qh-dim').forEach(el=>{
+    const d=el.dataset.d,prog=dimProgress[d];
+    const isCur=q.d===d,isDone=prog.done===prog.total&&!isCur;
+    el.classList.toggle('cur',isCur);
+    el.classList.toggle('done',isDone);
+    el.title=`${prog.done}/${prog.total} 已完成`;
+  });
 
-function jumpToQuestion(index) {
-  closeModal(); isNavigating=false; currentIndex=index; renderQuestion(index,'none'); window.scrollTo({top:0,behavior:'smooth'});
-}
-function jumpToQuestionThenReturnLast(index) {
-  closeModal(); isNavigating=false; currentIndex=index; renderQuestion(index,'none'); window.scrollTo({top:0,behavior:'smooth'}); pendingReturnToLast=true;
-}
-function showUnansweredAfterLast(unanswered) {
-  const grid = document.getElementById('unanswered-grid');
-  document.getElementById('modal-subtitle').textContent = `还有 ${unanswered.length} 道题尚未填写，点击可直接跳转：`;
-  grid.innerHTML = unanswered.map(i => `<button class="unanswered-btn" onclick="jumpToQuestionThenReturnLast(${i})">第 ${i+1} 题</button>`).join('');
-  document.getElementById('unanswered-modal').classList.add('open');
-}
-
-function submitTest() {
-  const unanswered = [];
-  for (let i = 0; i < QUESTIONS.length; i++) { if (answers[i]===undefined) unanswered.push(i); }
-  if (unanswered.length > 0) {
-    document.getElementById('modal-subtitle').textContent = `还有 ${unanswered.length} 道题未填写：`;
-    document.getElementById('unanswered-grid').innerHTML = unanswered.map(i => `<button class="unanswered-btn" onclick="jumpToQuestion(${i})">第 ${i+1} 题</button>`).join('');
-    document.getElementById('unanswered-modal').classList.add('open');
-    return;
-  }
-  calculateAndShowResult();
-}
-
-function calculateAndShowResult() {
-  // Compute dimension scores (0-100)
-  const dimScores = {};
-  let finalScore = 0;
-  for (const [dimKey, config] of Object.entries(DIM_CONFIG)) {
-    const rawSum = config.indices.reduce((sum, i) => sum + (answers[i] || 1), 0);
-    const minSum = config.indices.length;
-    const maxSum = config.indices.length * 5;
-    const normalized = (rawSum - minSum) / (maxSum - minSum) * 100;
-    dimScores[dimKey] = Math.round(normalized);
-    finalScore += normalized * config.weight;
-  }
-  finalScore = Math.round(finalScore);
-  showResult(finalScore, dimScores);
-}
-
-function showResult(finalScore, dimScores) {
-  // Find tier
-  let tier = TIERS[TIERS.length-1];
-  for (const t of TIERS) { if (finalScore >= t.minScore) { tier = t; break; } }
-
-  document.getElementById('result-tier-badge').textContent = tier.tierBadge;
-  document.getElementById('result-school-level').textContent = tier.schoolLevel;
-  document.getElementById('result-summary').textContent = tier.summary;
-  document.getElementById('result-tagline').textContent = tier.tagline;
-
-  // School showcase
-  document.getElementById('school-showcase').innerHTML = `
-    <div class="school-emblem-wrap">
-      ${getSchoolSVG(tier.svgId)}
-      <div class="school-emblem-label">${tier.schoolLevel}</div>
-    </div>
-    <div class="school-info">
-      <div class="score-badge">
-        <div class="score-num">${finalScore}</div>
-        <div class="score-text">综合评分<br><small>满分100分 · ${tier.scoreRange}分区间</small></div>
-      </div>
-      <div class="target-schools">
-        <div class="target-schools-label">MATCHED SCHOOLS · 匹配院校层次</div>
-        <div class="school-chips">
-          ${tier.targetSchools.slice(0,6).map(s => `<div class="school-chip">${s}</div>`).join('')}
-        </div>
-      </div>
-      <div style="margin-top:14px; font-size:12px; color:var(--mist); line-height:1.6; font-family:'Cinzel',serif; letter-spacing:0.05em;">
-        ${tier.population} 的保研申请者 · ${tier.populationNote}
-      </div>
+  const panel=document.getElementById('qpanel');
+  panel.style.animation='none';panel.offsetHeight;panel.style.animation='';
+  let opts='';
+  if(q.t==='choice'){
+    opts=`<div class="opts-choice">`+q.opts.map((o,k)=>`
+      <button class="opt${ans[i]===k?' sel':''}" onclick="pick(${i},'choice',${k})">
+        <span class="opt-key">${o.k}</span><span class="opt-txt">${o.t}</span>
+      </button>`).join('')+'</div>';
+  }else if(q.t==='binary'){
+    const sy=ans[i]==='y',sn=ans[i]==='n';
+    opts=`<div class="opts-binary">
+      <button class="bin${sy?' sel-y':''}" onclick="pick(${i},'binary','y')"><span class="bin-icon">✓</span><span class="bin-txt">${q.y.t}</span></button>
+      <button class="bin${sn?' sel-n':''}" onclick="pick(${i},'binary','n')"><span class="bin-icon">✗</span><span class="bin-txt">${q.no.t}</span></button>
     </div>`;
+  }else{
+    opts=`<div class="opts-tri">`+q.opts.map((o,k)=>`
+      <button class="tri${ans[i]===k?' '+o.c:''}" onclick="pick(${i},'trinary',${k})">
+        <span class="tri-dot"></span>
+        <span class="tri-content"><span class="tri-lvl">${o.l}</span><span class="tri-txt">${o.t}</span></span>
+      </button>`).join('')+'</div>';
+  }
+  panel.innerHTML=`
+    <div class="q-panel-header">
+      <div class="q-dim-pill">◆ ${DIMS[q.d].label}</div>
+      <div class="q-idx">Q${String(i+1).padStart(2,'0')} / ${TOTAL}</div>
+    </div>
+    <div class="q-text">${q.q}</div>
+    ${q.n?`<div class="q-note">${q.n}</div>`:''}
+    <div class="q-opts">${opts}</div>`;
+  document.getElementById('btn-prev').disabled=i===0;
+  const last=i===TOTAL-1;
+  document.getElementById('btn-next').style.display=last?'none':'';
+  document.getElementById('btn-sub').classList.toggle('show',last);
+  busy=false;
+}
 
-  // Dimension bars
-  const dimColors = {
-    academic: '#2c4a6e', english: '#4a6a2e', research: '#6a2c4a',
-    competition: '#7a4a1c', softskill: '#2a5a5a'
-  };
-  document.getElementById('dims-content').innerHTML = DIM_ORDER.map(dimKey => {
-    const config = DIM_CONFIG[dimKey];
-    const score = dimScores[dimKey];
-    const color = config.color;
-    return `
-      <div class="dim-row-result">
-        <div class="dim-row-label">
-          ${config.label}
-          <small>${config.enLabel} · ${Math.round(config.weight*100)}%权重</small>
-        </div>
-        <div class="dim-bar-track">
-          <div class="dim-bar-fill" style="width:0%; background: linear-gradient(90deg, ${color}55, ${color});" data-target="${score}%"></div>
-        </div>
-        <div class="dim-score-pct" style="color:${color}">${score}</div>
-      </div>`;
+function pick(i,t,v){
+  ans[i]=v;
+  const curQ=Q[i];
+  document.querySelectorAll('.qh-dim').forEach(el=>{
+    const d=el.dataset.d,qs=Q.map((qq,j)=>qq.d===d?j:-1).filter(j=>j>=0);
+    el.classList.toggle('cur',curQ.d===d);
+    el.classList.toggle('done',qs.every(j=>ans[j]!==undefined)&&curQ.d!==d);
+  });
+  document.querySelectorAll('.opt,.bin,.tri').forEach(el=>el.classList.remove('sel','sel-y','sel-n','sel-h','sel-m','sel-l'));
+  if(t==='choice'){const btns=document.querySelectorAll('.opt');if(btns[v])btns[v].classList.add('sel');}
+  else if(t==='binary'){document.querySelectorAll('.bin').forEach((b,k)=>{if((v==='y'&&k===0)||(v==='n'&&k===1))b.classList.add(v==='y'?'sel-y':'sel-n');});}
+  else if(t==='trinary'){const btns=document.querySelectorAll('.tri');if(btns[v])btns[v].classList.add(Q[i].opts[v].c);}
+  updateProgressBars(i);
+  if(!busy){
+    busy=true;
+    setTimeout(()=>{
+      if(returnMode){
+        returnMode=false;
+        const rem=Q.map((_,j)=>j).filter(j=>ans[j]===undefined&&j!==i);
+        if(rem.length){busy=false;showModal(rem);return;}
+        cur=TOTAL-1;renderQ(cur);return;
+      }
+      if(i<TOTAL-1){cur=i+1;renderQ(cur);window.scrollTo({top:0,behavior:'smooth'});}
+      else{
+        const rem=Q.map((_,j)=>j).filter(j=>ans[j]===undefined&&j!==i);
+        if(rem.length){showModal(rem);}
+        busy=false;
+      }
+    },430);
+  }
+}
+
+function nav(d){if(busy)return;const n=cur+d;if(n<0||n>=TOTAL)return;cur=n;renderQ(cur);window.scrollTo({top:0,behavior:'smooth'});}
+function showModal(rem){
+  document.getElementById('modal-sub').textContent=`还有 ${rem.length} 道题未作答，点击跳转：`;
+  document.getElementById('modal-grid').innerHTML=rem.map(i=>`<button class="modal-qb" onclick="jump(${i})">Q${i+1}</button>`).join('');
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function jump(i){closeModal();busy=false;cur=i;renderQ(i);window.scrollTo({top:0,behavior:'smooth'});returnMode=true;}
+function submit(){
+  const rem=Q.map((_,i)=>i).filter(i=>ans[i]===undefined);
+  if(rem.length){showModal(rem);return;}
+  calc();
+}
+
+function calc(){
+  const ds={};let score=0;
+  DORDER.forEach(d=>{
+    const qs=Q.map((q,i)=>[q,i]).filter(([q])=>q.d===d);
+    let ratioSum=0;
+    qs.forEach(([q,i])=>{
+      const a=ans[i];let got=0,maxS=1;
+      if(q.t==='choice'){maxS=Math.max(...q.opts.map(o=>o.s));got=a!==undefined?q.opts[a].s:0;}
+      else if(q.t==='binary'){maxS=Math.max(q.y.s,q.no.s);got=a==='y'?q.y.s:a==='n'?q.no.s:0;}
+      else if(q.t==='trinary'){maxS=Math.max(...q.opts.map(o=>o.s));got=a!==undefined?q.opts[a].s:0;}
+      ratioSum+=maxS>0?got/maxS:0;
+    });
+    ds[d]=qs.length>0?Math.round(ratioSum/qs.length*100):0;
+    score+=ds[d]*DIMS[d].w;
+  });
+  score=Math.round(score);
+  buildResult(score,ds);
+}
+
+function lvl(s){return s>=80?'强势竞争力':s>=60?'良好':s>=40?'中等':s>=20?'较弱':'待提升'}
+
+function buildResult(score,ds){
+  const tier=TIERS.find(t=>score>=t.min)||TIERS[TIERS.length-1];
+  document.getElementById('rtag').textContent=tier.tag;
+  document.getElementById('rname').textContent=tier.name;
+  document.getElementById('rsub').textContent=tier.sub;
+  document.getElementById('rchips').innerHTML=tier.chips.map(c=>`<div class="res-chip">${c}</div>`).join('');
+  document.getElementById('rscore').textContent=score;
+  setTimeout(()=>document.getElementById('rbar').style.width=score+'%',300);
+  document.getElementById('dimbars').innerHTML=DORDER.map(d=>{
+    const c=DIMS[d],s=ds[d];
+    return`<div class="dim-row">
+      <div class="dim-row-top"><span class="dim-rname">${c.label}<span class="dim-ren"> ${c.en} · ${Math.round(c.w*100)}%</span></span><span class="dim-rscore" style="color:${c.c}">${s}</span></div>
+      <div class="dim-rbar"><div class="dim-rfill" style="width:0%;background:${c.c}" data-w="${s}%"></div></div>
+      <div class="dim-rlvl">${lvl(s)}</div>
+    </div>`;
   }).join('');
-
-  // Result sections
-  document.getElementById('result-sections').innerHTML = `
-    <div class="result-section">
-      <div class="section-label">PROFILE ANALYSIS · 竞争力画像</div>
-      <div class="section-title">你的保研竞争力解读</div>
-      <div class="section-body" style="white-space:pre-line">${tier.profile}</div>
-    </div>
-    <div class="result-section">
-      <div class="section-label">DIMENSION STRENGTHS · 维度优势</div>
-      <div class="section-title">你的核心竞争优势</div>
-      <div class="section-body">${tier.strengths}</div>
-      <div style="margin-top:16px;">
-        ${DIM_ORDER.map(dimKey => {
-          const s = dimScores[dimKey]; const c = DIM_CONFIG[dimKey];
-          const level = s>=80?'强势':s>=60?'良好':s>=40?'一般':'待提升';
-          return `<span style="display:inline-block;margin:4px 6px 4px 0;padding:5px 12px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;border:1px solid ${c.color}40;color:${c.color};background:${c.color}08;">${c.label} · ${level}(${s})</span>`;
-        }).join('')}
-      </div>
-    </div>
-    <div class="result-section">
-      <div class="section-label">STRATEGY · 申请策略</div>
-      <div class="section-title">你的保研路径建议</div>
-      <div class="section-body">${tier.strategy}</div>
-    </div>
-    <div class="result-section">
-      <div class="section-label">ACTION ITEMS · 行动清单</div>
-      <div class="section-title">接下来最重要的5件事</div>
-      <ul class="action-items">
-        ${tier.actions.map(a => `<li>${a}</li>`).join('')}
-      </ul>
-    </div>
-    <div class="result-section">
-      <div class="section-label">SCHOOL TIERS · 院校梯队参考</div>
-      <div class="section-title">冲刺·稳妥·保底院校参考</div>
-      <div class="section-body" style="margin-bottom:12px;">以下为通用参考框架，实际建议结合你的专业方向、院校背景和具体目标院校的往年数据综合判断。</div>
-      <div class="schools-grid">
-        <div class="school-tier-card"><div class="tier-name">PEAK · 冲刺档</div><div class="school-list">${TIERS.slice(0,2).map(t=>t.altSchools.join('、')).join('；')}</div></div>
-        <div class="school-tier-card"><div class="tier-name">SOLID · 稳妥档</div><div class="school-list">${TIERS.slice(2,4).map(t=>t.altSchools.join('、')).join('；')}</div></div>
-        <div class="school-tier-card"><div class="tier-name">SAFE · 保底档</div><div class="school-list">${TIERS.slice(4,6).map(t=>t.altSchools.join('、')).join('；')}</div></div>
-      </div>
-    </div>
-    <div class="result-section">
-      <div class="section-label">DISCLAIMER · 评估说明</div>
-      <div class="section-title">关于本测评结果的使用</div>
-      <div class="section-body">本测评基于公开的保研政策文件、各高校招生数据及推免经验汇总构建，旨在帮助你全面认识自身竞争力的分布情况，并提供有参考价值的方向建议。由于院校要求每年动态变化、个体专业方向差异显著，<strong>测评结果仅供参考，不构成录取保证</strong>。建议结合所在学校教务处的推免政策、目标院校的最新招生简章，以及已保研学长学姐的真实经验，进行综合研判。</div>
-    </div>`;
-
-  showScreen('result-screen');
-
-  setTimeout(() => {
-    document.querySelectorAll('.dim-bar-fill').forEach(bar => { bar.style.width = bar.dataset.target; });
-  }, 350);
+  document.getElementById('rillus').innerHTML=`<div style="width:100%;">${radarChart(ds)}</div>
+    <div class="illus-lbl">${tier.name}<br><span style="font-size:12px;font-weight:400;color:var(--muted);letter-spacing:.04em">${tier.pop} 的申请者具备此竞争力</span></div>`;
+  document.getElementById('rsections').innerHTML=[
+    {ico:'🔍',bg:'rgba(15,61,138,.07)',t:'竞争力画像',en:'PROFILE',body:`<p>${tier.profile}</p>`},
+    {ico:'🗺',bg:'rgba(26,92,58,.07)',t:'申请策略建议',en:'STRATEGY',body:`<p>${tier.strategy}</p>`},
+    {ico:'✅',bg:'rgba(212,160,23,.1)',t:'接下来最重要的 5 件事',en:'ACTION ITEMS',actions:tier.actions},
+    {ico:'📐',bg:'rgba(107,33,168,.07)',t:'院校梯队参考方案',en:'SCHOOL TIERS',
+     body:`<div class="tier-grid">
+      <div class="tier-cell"><div class="tier-cell-hd" style="color:#0f3d8a">冲刺档 REACH</div><div class="tier-cell-body">${TIERS.slice(0,2).map(t=>t.name.split('·')[0]).join('、')}等</div></div>
+      <div class="tier-cell"><div class="tier-cell-hd" style="color:#1a5c3a">稳妥档 MATCH</div><div class="tier-cell-body">${TIERS.slice(2,4).map(t=>t.name.split('·')[0]).join('、')}等</div></div>
+      <div class="tier-cell"><div class="tier-cell-hd" style="color:#92400e">保底档 SAFE</div><div class="tier-cell-body">${TIERS.slice(4).map(t=>t.name.split('·')[0]).join('、')}等</div></div>
+     </div>`},
+  ].map(s=>`
+    <div class="sec-panel">
+      <div class="sec-hd"><div class="sec-ico" style="background:${s.bg}">${s.ico}</div><div class="sec-ttl">${s.t}</div><div class="sec-en">${s.en}</div></div>
+      <div class="sec-bd">${s.actions?`<ul class="action-list">${s.actions.map((a,i)=>`<li class="action-li"><span class="act-n">${i+1}</span>${a}</li>`).join('')}</ul>`:s.body}</div>
+    </div>`).join('');
+  showScreen('result');
+  setTimeout(()=>document.querySelectorAll('.dim-rfill').forEach(el=>el.style.width=el.dataset.w),350);
 }
 
-function restartTest() { showScreen('intro-screen'); }
+function restartTest(){showScreen('intro');}
 
-window.addEventListener('load', () => {
-  const loading = document.getElementById('loading');
-  setTimeout(() => {
-    loading.classList.add('fade-out');
-    setTimeout(() => { loading.style.display='none'; showScreen('intro-screen'); }, 800);
-  }, 1200);
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    const l=document.getElementById('loading');
+    l.classList.add('out');
+    setTimeout(()=>{l.style.display='none';showScreen('intro');},650);
+  },1100);
 });
 </script>
 </body>
